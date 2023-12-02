@@ -18,4 +18,4 @@ add_executable(gtwd
         ${Decoder_SOURCES}
         ${Encoder_SOURCES}
         ${Utils_SOURCES}
-        ${Libraries_SOURCES})
+        ${Libraries_SOURCES} Utils/Utils.h)
