@@ -1,6 +1,6 @@
 # GTWD
 
-> **G**TWD: **T**ypical **W**AV/FLAC **D**ecoder/Encoder
+> **G**lobal **T**ranscoder for **W**av/FLAC **D**ata
 
 Actually originated in the famous saying:
 
