@@ -1,0 +1,5 @@
+{
+  "channels": 2,
+  "rate": 44100,
+  "format": "S16LE"
+}

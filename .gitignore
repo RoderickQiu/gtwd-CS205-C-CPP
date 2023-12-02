@@ -637,3 +637,5 @@ $RECYCLE.BIN/
 *.lnk
 
 # End of https://www.toptal.com/developers/gitignore/api/clion,vs,visualstudiocode,jetbrains+all,macos,windows,linux,cmake
+
+out.*
