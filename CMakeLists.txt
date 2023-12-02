@@ -14,4 +14,4 @@ add_executable(gtwd
         main.cpp
         ${Decoder_SOURCES}
         ${Encoder_SOURCES}
-)
+        Utils/fileIO.cpp)
