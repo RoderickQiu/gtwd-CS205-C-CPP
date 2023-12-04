@@ -4,27 +4,26 @@
 #ifndef GTWD_UTILS_H
 #define GTWD_UTILS_H
 #include<iostream>
-class fileReader
-{
-public:
-    std::istream input;
+class fileReader{
+    private:
+        std::istream& input;
+        unsigned long long inputBuffer;
+        int inputBufferLength;
 
-    fileReader(): input(nullptr)
-    {
-        throw std::runtime_error("Initializing Failed: no argument for fileReader");
-    };
-    int write();
-    int readLittleInt(int n);
+    public:
+        fileReader(std::istream& inStream) : input(inStream) {
+            inputBuffer = 0;
+            inputBufferLength = 0;
+        }
+        int readLittleUInt(int n);
+        int readBigUInt(int n);
 };
 
-class fileWriter
-{
-public:
-    std::ostream out;
-
-    fileWriter(): out(nullptr)
-    {
-        throw std::runtime_error("Initializing Failed: no argument for fileWriter");
-    };
+class fileWriter{
+    private:
+        std::ostream& out;
+    public:
+        fileWriter(std::ostream& outStream) : out(outStream) {};
+        int write();
 };
 #endif //GTWD_UTILS_H
