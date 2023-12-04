@@ -5,8 +5,4 @@
 #include "Wav2flac.h"
 #include<fstream>
 
-int main() {
-
-}
-
 

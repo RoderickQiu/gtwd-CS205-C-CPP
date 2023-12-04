@@ -9,6 +9,12 @@
 
 using namespace std;
 
+typedef struct pcmConfig {
+    int sample_rate;
+    int depth;
+    int channels;
+} PcmConfig;
+
 class Pcm2wav {
 public:
     static string hello() {

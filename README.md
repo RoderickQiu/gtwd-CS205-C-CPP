@@ -17,3 +17,4 @@ Actually originated in the famous saying:
     - `w2p` for wav to pcm
 - `-i` or `--input`: input file path.
 - `-o` or `--output`: output file path.
+- `-c` or `--config`: config ini file path for `pcm` files.
