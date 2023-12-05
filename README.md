@@ -15,6 +15,7 @@ Actually originated in the famous saying:
     - `p2f` for pcm to flac
     - `p2w` for pcm to wav
     - `w2p` for wav to pcm
+    - `fmeta` for flac meta data
 - `-i` or `--input`: input file path.
 - `-o` or `--output`: output file path.
 - `-c` or `--config`: config ini file path for `pcm` files.

@@ -3,8 +3,9 @@
 #include "Decoder/Wav2flac.h"
 #include "Encoder/Flac2wav.h"
 #include "Encoder/Wav2pcm.h"
+#include "Encoder/FlacMetadata.h"
 #include "Libraries/clipp.h"
-#include "SimpleIni.h"
+#include "Libraries/SimpleIni.h"
 
 using namespace std;
 using namespace clipp;
@@ -34,22 +35,22 @@ int main(int argc, char **argv) {
             fileWriter out = fileWriter(output);
             Wav2flac::encodeFile(in, out);
         } else if (mode == "f2w") { // flac to wav
-            ifstream inputFile(input, ios::in|ios::binary);
-            ofstream outputFile(output, ios::out|ios::trunc|ios::binary);
-            if(!inputFile.is_open()) {
-                cout<<"Error opening input file"<<endl;
+            ifstream inputFile(input, ios::in | ios::binary);
+            ofstream outputFile(output, ios::out | ios::trunc | ios::binary);
+            if (!inputFile.is_open()) {
+                cout << "Error opening input file" << endl;
                 return 1;
             }
-            if(!outputFile.is_open()) {
-                cout<<"Error opening output file"<<endl;
+            if (!outputFile.is_open()) {
+                cout << "Error opening output file" << endl;
                 return 1;
             }
             fileReader reader(inputFile);
             fileWriter writer(outputFile);
             try {
                 Flac2wav::decodeFile(reader, writer);
-            } catch (exception& e) {
-                cout<<e.what()<<endl;
+            } catch (exception &e) {
+                cout << e.what() << endl;
             }
             reader.closeReader();
         } else if (mode == "w2p") {// wav to pcm
@@ -76,6 +77,15 @@ int main(int argc, char **argv) {
         } else if (mode == "p2f") {// pcm to flac
             cout << Pcm2wav::hello() << endl;
             cout << Wav2flac::hello() << endl;
+        } else if (mode == "fmeta") {
+            ifstream inputFile(input, ios::in | ios::binary);
+            if (inputFile.is_open()) {
+                fileReader inStream = fileReader(inputFile);
+                FlacMetadata::interpretFile(inStream);
+                inputFile.close();
+            } else {
+                throw runtime_error("Error opening file (main::main)");
+            }
         } else {
             cout << "Invalid mode" << endl;
             return 1;
