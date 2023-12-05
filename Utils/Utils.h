@@ -6,17 +6,21 @@
 #include<iostream>
 class fileReader{
     private:
-        std::istream& input;
+        std::ifstream& input;
         unsigned long long inputBuffer;
         int inputBufferLength;
 
     public:
-        fileReader(std::istream& inStream) : input(inStream) {
+        fileReader(std::ifstream& inStream) : input(inStream) {
             inputBuffer = 0;
             inputBufferLength = 0;
         }
-        int readLittleUInt(int n);
-        int readBigUInt(int n);
+        unsigned int readLittleUInt(int n);
+        unsigned int readBigUInt(int n);
+        int readLittleSInt(int n);
+        int readBigSInt(int n);
+        void alignByte();
+        void closeReader();
 };
 
 class fileWriter{
