@@ -25,9 +25,17 @@ class fileReader{
 
 class fileWriter{
     private:
-        std::ostream& out;
+        std::ofstream& output;
+        unsigned long long outputBuffer;
+        int outputBufferLength;
     public:
-        fileWriter(std::ostream& outStream) : out(outStream) {};
-        int write();
+        fileWriter(std::ofstream& outStream) : output(outStream) {
+            outputBuffer = 0;
+            outputBufferLength = 0;
+        }
+        void writeLittleInt(int data, int n);
+        void writeBigInt(int data, int n);
+        void alignByte();
+        void closeWriter();
 };
 #endif //GTWD_UTILS_H

@@ -151,7 +151,7 @@
 
     @section save SAVE ORDER
 
-    The sections and keys are written out in the same order as they were
+    The sections and keys are written output in the same order as they were
     read in from the file. Sections and keys added to the data after the
     file has been loaded will be added to the end of the file when it is
     written. There is no way to specify the location of a section or key
@@ -549,7 +549,7 @@ public:
     bool IsMultiLine() const { return m_bAllowMultiLine; }
 
     /** Should spaces be added around the equals sign when writing key/value
-        pairs out. When true, the result will be "key = value". When false,
+        pairs output. When true, the result will be "key = value". When false,
         the result will be "key=value". This value may be changed at any time.
 
         \param a_bSpaces     Add spaces around the equals sign?
@@ -737,7 +737,7 @@ public:
         convert text to the correct format regardless of the output format
         being used by SimpleIni.
 
-        To add a BOM to UTF-8 data, write it out manually at the very beginning
+        To add a BOM to UTF-8 data, write it output manually at the very beginning
         like is done in SaveFile when a_bUseBOM is true.
 
         @param a_oOutput    Output writer to write the data to.
@@ -1331,7 +1331,7 @@ private:
     /** Are data values permitted to span multiple lines? */
     bool m_bAllowMultiLine;
 
-    /** Should spaces be written out surrounding the equals sign? */
+    /** Should spaces be written output surrounding the equals sign? */
     bool m_bSpaces;
 
     /** Should quoted data in values be recognized and parsed? */
@@ -1846,7 +1846,7 @@ CSimpleIniTempl<SI_CHAR, SI_STRLESS, SI_CONVERTER>::LoadMultiLineText(
         bool a_bAllowBlankLinesInComment
 ) const {
     // we modify this data to strip all newlines down to a single '\n'
-    // character. This means that on Windows we need to strip out some
+    // character. This means that on Windows we need to strip output some
     // characters which will make the data shorter.
     // i.e.  LINE1-LINE1\r\nLINE2-LINE2\0 will become
     //       LINE1-LINE1\nLINE2-LINE2\0
@@ -1874,7 +1874,7 @@ CSimpleIniTempl<SI_CHAR, SI_STRLESS, SI_CONVERTER>::LoadMultiLineText(
 
             // if we are allowing blank lines then we only include them
             // in this comment if another comment follows, so read ahead
-            // to find out.
+            // to find output.
             SI_CHAR *pCurr = a_pData;
             int nNewLines = 0;
             while (IsSpace(*pCurr)) {
@@ -2532,7 +2532,7 @@ CSimpleIniTempl<SI_CHAR, SI_STRLESS, SI_CONVERTER>::Save(
     oSections.sort(typename Entry::LoadOrder());
 #endif
 
-    // if there is an empty section name, then it must be written out first
+    // if there is an empty section name, then it must be written output first
     // regardless of the load order
     typename TNamesDepend::iterator is = oSections.begin();
     for (; is != oSections.end(); ++is) {
@@ -2557,7 +2557,7 @@ CSimpleIniTempl<SI_CHAR, SI_STRLESS, SI_CONVERTER>::Save(
     // iterate through our sections and output the data
     typename TNamesDepend::const_iterator iSection = oSections.begin();
     for (; iSection != oSections.end(); ++iSection) {
-        // write out the comment if there is one
+        // write output the comment if there is one
         if (iSection->pComment) {
             if (bNeedNewLine) {
                 a_oOutput.Write(SI_NEWLINE_A);
@@ -2606,7 +2606,7 @@ CSimpleIniTempl<SI_CHAR, SI_STRLESS, SI_CONVERTER>::Save(
 
             typename TNamesDepend::const_iterator iValue = oValues.begin();
             for (; iValue != oValues.end(); ++iValue) {
-                // write out the comment if there is one
+                // write output the comment if there is one
                 if (iValue->pComment) {
                     a_oOutput.Write(SI_NEWLINE_A);
                     if (!OutputMultiLineText(a_oOutput, convert, iValue->pComment)) {

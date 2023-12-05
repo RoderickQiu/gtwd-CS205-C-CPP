@@ -54,7 +54,7 @@ cmake-build-*/
 *.iws
 
 # IntelliJ
-out/
+output/
 
 # mpeltonen/sbt-idea plugin
 .idea_modules/
@@ -638,4 +638,4 @@ $RECYCLE.BIN/
 
 # End of https://www.toptal.com/developers/gitignore/api/clion,vs,visualstudiocode,jetbrains+all,macos,windows,linux,cmake
 
-out.*
+output.*

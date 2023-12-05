@@ -4952,7 +4952,7 @@ private:
     void discard_alternative_miss_candidates(const dfs_traverser& match)
     {
         if(missCand_.empty()) return;
-        //find out, if miss candidate is sibling of one of the same
+        //find output, if miss candidate is sibling of one of the same
         //alternative groups that the current match is a member of
         //if so, we can discard the miss
 

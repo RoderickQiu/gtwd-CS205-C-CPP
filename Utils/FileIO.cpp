@@ -5,11 +5,6 @@
 #include <stdexcept>
 #include <fstream>
 
-
-/// 参数：
-/// std::stream 比特数据流
-/// int 读取数据位数（不可超过32）
-/// 功能：将输入流中的前n个字节的数据转化为int类型的数据
 unsigned int fileReader::readLittleUInt(int n) {
     if (n > 32) {
         throw std::runtime_error("n should be less than 32 (fileReader::readLittleUInt)");
@@ -24,7 +19,7 @@ unsigned int fileReader::readLittleUInt(int n) {
         inputBufferLength += 8;
     }
     inputBufferLength -= n;
-    unsigned int result = (unsigned int) inputBuffer & (((unsigned long long)1 << n) - 1);
+    unsigned int result = (unsigned int) (inputBuffer & ((1ull << n) - 1));
     inputBuffer = inputBuffer >> n;
     if(n < 32) {
         result &= (1 << n) - 1;
@@ -50,7 +45,7 @@ unsigned int fileReader::readBigUInt(int n) {
         inputBufferLength += 8;
     }
     inputBufferLength -= n;
-    unsigned int result = (unsigned int)inputBuffer >> inputBufferLength;
+    unsigned int result = (unsigned int) (inputBuffer >> inputBufferLength);
     inputBuffer &= (1 << inputBufferLength) - 1;
     if(n < 32) {
         result &= (1 << n) - 1;
@@ -69,4 +64,41 @@ void fileReader::alignByte() {
 
 void fileReader::closeReader() {
     input.close();
+}
+
+void fileWriter::writeLittleInt(int data, int n) {
+    if(n % 8 != 0) {
+        throw std::runtime_error("n should be a multiple of 8 (fileWriter::writeLittleInt)");
+    }
+
+    for (int i = 0; i < n / 8; ++i) {
+        output.put((char)(data >> (i * 8)));
+    }
+}
+
+void fileWriter::writeBigInt(int data, int n) {
+    if(n > 32){
+        throw std::runtime_error("n should be less than 32 (fileWriter::writeBigInt)");
+    }
+
+    outputBuffer = (outputBuffer << n) | (data & ((1ull << n) - 1));
+    outputBufferLength += n;
+    while(outputBufferLength >= 8) {
+        outputBufferLength -= 8;
+        output.put((char)(outputBuffer >> outputBufferLength));
+        outputBuffer &= (1 << outputBufferLength) - 1;
+    }
+}
+
+void fileWriter::alignByte() {
+    // This function should only be used in wav2flac
+    if(outputBufferLength > 0) {
+        writeBigInt(0, 8 - outputBufferLength);
+    }
+}
+
+void fileWriter::closeWriter() {
+    alignByte();
+    output.flush();
+    output.close();
 }

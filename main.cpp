@@ -21,8 +21,26 @@ int main(int argc, char **argv) {
         cout << "Output: " << output << endl;
         if (mode == "w2f") { // wav to flac
             cout << Wav2flac::hello() << endl;
-        } else if (mode == "f2w") {// flac to wav
-            cout << Flac2wav::hello() << endl;
+        } else if (mode == "f2w") { // flac to wav
+            ifstream inputFile(input, ios::in|ios::binary);
+            ofstream outputFile(output, ios::out|ios::trunc|ios::binary);
+            if(!inputFile.is_open()) {
+                cout<<"Error opening input file"<<endl;
+                return 1;
+            }
+            if(!outputFile.is_open()) {
+                cout<<"Error opening output file"<<endl;
+                return 1;
+            }
+
+            fileReader reader(inputFile);
+            fileWriter writer(outputFile);
+            try {
+                Flac2wav::decodeFile(reader, writer);
+            } catch (exception& e) {
+                cout<<e.what()<<endl;
+            }
+            reader.closeReader();
         } else if (mode == "w2p") {// wav to pcm
             cout << Wav2pcm::hello() << endl;
         } else if (mode == "p2w") {// pcm to wav
