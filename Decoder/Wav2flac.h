@@ -6,6 +6,8 @@
 #define GTWD_WAV2FLAC_H
 
 #include<string>
+#include<fstream>
+#include "../Utils/Utils.h"
 
 using namespace std;
 
@@ -14,6 +16,9 @@ public:
     static string hello() {
         return "Hello from Wav2fLaC";
     }
+
+    static void encodeFile(fileReader &in, fileWriter &out);
+
 };
 
 

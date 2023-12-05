@@ -20,7 +20,19 @@ int main(int argc, char **argv) {
         cout << "Input: " << input << endl;
         cout << "Output: " << output << endl;
         if (mode == "w2f") { // wav to flac
-            cout << Wav2flac::hello() << endl;
+            ifstream input("./ProvidedDocuments/ovs.wav", ios::in | ios::binary);
+            ofstream output("./ProvidedDocuments/out.flac", ios::out | ios::binary);
+            if(!input.is_open()) {
+                cout<<"Error opening input file"<<endl;
+                return 1;
+            }
+            if(!output.is_open()) {
+                cout<<"Error opening output file"<<endl;
+                return 1;
+            }
+            fileReader in = fileReader(input);
+            fileWriter out = fileWriter(output);
+            Wav2flac::encodeFile(in, out);
         } else if (mode == "f2w") { // flac to wav
             ifstream inputFile(input, ios::in|ios::binary);
             ofstream outputFile(output, ios::out|ios::trunc|ios::binary);
@@ -32,7 +44,6 @@ int main(int argc, char **argv) {
                 cout<<"Error opening output file"<<endl;
                 return 1;
             }
-
             fileReader reader(inputFile);
             fileWriter writer(outputFile);
             try {
