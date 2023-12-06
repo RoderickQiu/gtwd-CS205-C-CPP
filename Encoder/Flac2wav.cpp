@@ -74,19 +74,20 @@ void Flac2wav::decodeFile(fileReader &in, fileWriter &out) {
     out.writeBigInt(0x64617461, 32); // "data"
     out.writeLittleInt((int)sampleDataLength, 32); // data chunk size
 
+    while(decodeFrames(in, out, numChannels, sampleDepth));
+}
+
+bool Flac2wav::decodeFrames(fileReader &in, fileWriter &out, unsigned int numChannels, unsigned int sampleDepth) {
+    unsigned int syncCode;
     try {
-        while(true) {
-            decodeFrames(in, out, numChannels, sampleDepth);
-        }
+        syncCode = in.readBigUInt(14);
     } catch (std::runtime_error &e) {
         if(strcmp(e.what(), "Reached end of file") != 0) {
             throw e;
         }
+        return false;
     }
-}
 
-bool Flac2wav::decodeFrames(fileReader &in, fileWriter &out, unsigned int numChannels, unsigned int sampleDepth) {
-    unsigned int syncCode = in.readBigUInt(14);
     if(syncCode != 0x3FFE) {
         throw std::runtime_error("Invalid Sync Code (Flac2wav::decodeFrame)");
     }
@@ -149,16 +150,20 @@ bool Flac2wav::decodeFrames(fileReader &in, fileWriter &out, unsigned int numCha
 
     for (int i = 0; i < blockSize; ++i) {
         for (int j = 0; j < numChannels; ++j) {
-            out.writeLittleInt(samples[j][i], sampleDepth);
+            out.writeLittleInt(samples[j][i], (int)sampleDepth);
         }
+    }
+
+    for (int i = 0; i < numChannels; ++i) {
+        delete[] samples[i];
     }
     return true;
 }
 
 void Flac2wav::decodeSubFrames(fileReader &in, unsigned int sampleDepth, unsigned int channelAssignment, unsigned int numChannels, unsigned int blockSize, unsigned int* samples[]) {
-    unsigned long long* results[numChannels];
+    long long* results[numChannels];
     for (int i = 0; i < numChannels; ++i) {
-        results[i] = new unsigned long long[blockSize];
+        results[i] = new long long[blockSize];
     }
 
     if(channelAssignment <= 7){
@@ -178,8 +183,8 @@ void Flac2wav::decodeSubFrames(fileReader &in, unsigned int sampleDepth, unsigne
             }
         }else if(channelAssignment == 10) {
             for (int i = 0; i < blockSize; ++i) {
-                unsigned long long mid = results[0][i];
-                unsigned long long side = results[1][i];
+                long long mid = results[0][i];
+                long long side = results[1][i];
                 results[0][i] = mid + (side >> 1);
                 results[1][i] = mid - (side >> 1);
             }
@@ -193,9 +198,13 @@ void Flac2wav::decodeSubFrames(fileReader &in, unsigned int sampleDepth, unsigne
             samples[i][j] = (unsigned int)results[i][j];
         }
     }
+
+    for (int i = 0; i < numChannels; ++i) {
+        delete[] results[i];
+    }
 }
 
-void Flac2wav::decodeSubFrame(fileReader &in, unsigned int sampleDepth, unsigned int blockSize, unsigned long long int *result) {
+void Flac2wav::decodeSubFrame(fileReader &in, unsigned int sampleDepth, unsigned int blockSize, long long int *result) {
     unsigned int padding = in.readBigUInt(1);
     if(padding != 0) {
         throw std::runtime_error("Reserved padding bit (Flac2wav::decodeSubFrame)");
@@ -215,7 +224,7 @@ void Flac2wav::decodeSubFrame(fileReader &in, unsigned int sampleDepth, unsigned
     sampleDepth -= wastedBits;
 
     for (int i = 0; i < blockSize; ++i) {
-        result[i] = in.readBigSInt(sampleDepth);
+        result[i] = in.readBigSInt((int)sampleDepth);
         result[i] <<= wastedBits;
     }
 }

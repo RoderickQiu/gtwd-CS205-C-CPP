@@ -14,7 +14,7 @@ class Flac2wav {
     private:
         static bool decodeFrames(fileReader& in, fileWriter& out, unsigned int numChannels, unsigned int sampleDepth);
         static void decodeSubFrames(fileReader& in, unsigned int sampleDepth, unsigned int channelAssignment, unsigned int numChannels, unsigned int blockSize, unsigned int* samples[]);
-        static void decodeSubFrame(fileReader& in, unsigned int sampleDepth, unsigned int blockSize, unsigned long long result[]);
+        static void decodeSubFrame(fileReader& in, unsigned int sampleDepth, unsigned int blockSize, long long result[]);
     public:
         static string hello() {
             return "Hello from fLaC2Wav";
