@@ -3,8 +3,9 @@
 #include "Decoder/Wav2flac.h"
 #include "Encoder/Flac2wav.h"
 #include "Encoder/Wav2pcm.h"
+#include "Encoder/FlacMetadata.h"
 #include "Libraries/clipp.h"
-#include "SimpleIni.h"
+#include "Libraries/SimpleIni.h"
 
 using namespace std;
 using namespace clipp;
@@ -20,21 +21,37 @@ int main(int argc, char **argv) {
         cout << "Input: " << input << endl;
         cout << "Output: " << output << endl;
         if (mode == "w2f") { // wav to flac
-            cout << Wav2flac::hello() << endl;
-        } else if (mode == "f2w") { // flac to wav
-            ifstream inputFile(input, ios::in|ios::binary);
-            ofstream outputFile(output, ios::out|ios::trunc|ios::binary);
+            ifstream inputFile("./ProvidedDocuments/ovs.wav", ios::in | ios::binary);
+            ofstream outputFile("./ProvidedDocuments/out.flac", ios::out | ios::trunc | ios::binary);
             if(!inputFile.is_open()) {
-                throw std::runtime_error("Error opening input file");
+                cout<<"Error opening input file"<<endl;
+                return 1;
             }
             if(!outputFile.is_open()) {
-                throw std::runtime_error("Error opening output file");
+                cout<<"Error opening output file"<<endl;
+                return 1;
             }
-
+            fileReader reader(inputFile);
+            fileWriter writer(outputFile);
+            Wav2flac::encodeFile(reader, writer);
+            reader.closeReader();
+            writer.closeWriter();
+        } else if (mode == "f2w") { // flac to wav
+            ifstream inputFile(input, ios::in | ios::binary);
+            ofstream outputFile(output, ios::out | ios::trunc | ios::binary);
+            if (!inputFile.is_open()) {
+                cout << "Error opening input file" << endl;
+                return 1;
+            }
+            if (!outputFile.is_open()) {
+                cout << "Error opening output file" << endl;
+                return 1;
+            }
             fileReader reader(inputFile);
             fileWriter writer(outputFile);
             Flac2wav::decodeFile(reader, writer);
             reader.closeReader();
+            writer.closeWriter();
         } else if (mode == "w2p") {// wav to pcm
             cout << Wav2pcm::hello() << endl;
         } else if (mode == "p2w") {// pcm to wav
@@ -59,6 +76,15 @@ int main(int argc, char **argv) {
         } else if (mode == "p2f") {// pcm to flac
             cout << Pcm2wav::hello() << endl;
             cout << Wav2flac::hello() << endl;
+        } else if (mode == "fmeta") {
+            ifstream inputFile(input, ios::in | ios::binary);
+            if (inputFile.is_open()) {
+                fileReader inStream = fileReader(inputFile);
+                FlacMetadata::interpretFile(inStream);
+                inputFile.close();
+            } else {
+                throw runtime_error("Error opening file (main::main)");
+            }
         } else {
             cout << "Invalid mode" << endl;
             return 1;
