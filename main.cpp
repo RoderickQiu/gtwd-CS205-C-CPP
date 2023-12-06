@@ -25,21 +25,15 @@ int main(int argc, char **argv) {
             ifstream inputFile(input, ios::in|ios::binary);
             ofstream outputFile(output, ios::out|ios::trunc|ios::binary);
             if(!inputFile.is_open()) {
-                cout<<"Error opening input file"<<endl;
-                return 1;
+                throw std::runtime_error("Error opening input file");
             }
             if(!outputFile.is_open()) {
-                cout<<"Error opening output file"<<endl;
-                return 1;
+                throw std::runtime_error("Error opening output file");
             }
 
             fileReader reader(inputFile);
             fileWriter writer(outputFile);
-            try {
-                Flac2wav::decodeFile(reader, writer);
-            } catch (exception& e) {
-                cout<<e.what()<<endl;
-            }
+            Flac2wav::decodeFile(reader, writer);
             reader.closeReader();
         } else if (mode == "w2p") {// wav to pcm
             cout << Wav2pcm::hello() << endl;

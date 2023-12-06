@@ -27,7 +27,7 @@ unsigned int fileReader::readLittleUInt(int n) {
     return result;
 }
 
-int fileReader::readLittleSInt(int n) {
+int fileReader::readLittleSInt(unsigned int n) {
     return ((int)readLittleUInt(n) << (32 - n)) >> (32 - n);
 }
 
@@ -53,7 +53,7 @@ unsigned int fileReader::readBigUInt(int n) {
     return result;
 }
 
-int fileReader::readBigSInt(int n) {
+int fileReader::readBigSInt(unsigned int n) {
     return ((int)readBigUInt(n) << (32 - n)) >> (32 - n);
 }
 
@@ -66,7 +66,7 @@ void fileReader::closeReader() {
     input.close();
 }
 
-void fileWriter::writeLittleInt(int data, int n) {
+void fileWriter::writeLittleInt(unsigned int data, int n) {
     if(n % 8 != 0) {
         throw std::runtime_error("n should be a multiple of 8 (fileWriter::writeLittleInt)");
     }
@@ -76,7 +76,7 @@ void fileWriter::writeLittleInt(int data, int n) {
     }
 }
 
-void fileWriter::writeBigInt(int data, int n) {
+void fileWriter::writeBigInt(unsigned int data, int n) {
     if(n > 32){
         throw std::runtime_error("n should be less than 32 (fileWriter::writeBigInt)");
     }

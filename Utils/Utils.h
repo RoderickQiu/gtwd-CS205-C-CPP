@@ -17,8 +17,8 @@ class fileReader{
         }
         unsigned int readLittleUInt(int n);
         unsigned int readBigUInt(int n);
-        int readLittleSInt(int n);
-        int readBigSInt(int n);
+        int readLittleSInt(unsigned int n);
+        int readBigSInt(unsigned int n);
         void alignByte();
         void closeReader();
 };
@@ -33,8 +33,8 @@ class fileWriter{
             outputBuffer = 0;
             outputBufferLength = 0;
         }
-        void writeLittleInt(int data, int n);
-        void writeBigInt(int data, int n);
+        void writeLittleInt(unsigned int data, int n);
+        void writeBigInt(unsigned int data, int n);
         void alignByte();
         void closeWriter();
 };
