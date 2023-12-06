@@ -24,12 +24,10 @@ int main(int argc, char **argv) {
             ifstream inputFile("./ProvidedDocuments/ovs.wav", ios::in | ios::binary);
             ofstream outputFile("./ProvidedDocuments/out.flac", ios::out | ios::trunc | ios::binary);
             if(!inputFile.is_open()) {
-                cout<<"Error opening input file"<<endl;
-                return 1;
+                throw runtime_error("Error opening input file");
             }
             if(!outputFile.is_open()) {
-                cout<<"Error opening output file"<<endl;
-                return 1;
+                throw runtime_error("Error opening output file");
             }
             fileReader reader(inputFile);
             fileWriter writer(outputFile);
@@ -40,12 +38,10 @@ int main(int argc, char **argv) {
             ifstream inputFile(input, ios::in | ios::binary);
             ofstream outputFile(output, ios::out | ios::trunc | ios::binary);
             if (!inputFile.is_open()) {
-                cout << "Error opening input file" << endl;
-                return 1;
+                throw runtime_error("Error opening input file");
             }
             if (!outputFile.is_open()) {
-                cout << "Error opening output file" << endl;
-                return 1;
+                throw runtime_error("Error opening output file");
             }
             fileReader reader(inputFile);
             fileWriter writer(outputFile);
@@ -61,7 +57,7 @@ int main(int argc, char **argv) {
             ini.SetUnicode();
             SI_Error rc = ini.LoadFile(config.c_str());
             if (rc < 0) {
-                throw "Error loading pcmConfig file";
+                throw runtime_error("Error loading config file");
             } else {
                 pcmConfig.channels = (int) ini.GetLongValue("STREAM INFO", "channels");
                 pcmConfig.depth = (int) ini.GetLongValue("STREAM INFO", "depth");
