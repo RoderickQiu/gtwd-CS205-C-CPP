@@ -30,7 +30,7 @@ unsigned int fileReader::readLittleUInt(int n) {
 }
 
 int fileReader::readLittleSInt(int n) {
-    return ((int)readLittleUInt(n) << (32 - n)) >> (32 - n);
+    return ((int) readLittleUInt(n) << (32 - n)) >> (32 - n);
 }
 
 unsigned int fileReader::readBigUInt(int n) {
@@ -68,8 +68,20 @@ void fileReader::closeReader() {
     input.close();
 }
 
+std::string fileReader::intToHex(int num) {
+    std::stringstream stream;
+    stream << std::hex << num;  // Convert decimal to hexadecimal
+    return stream.str();  // Return the hexadecimal string
+}
+
+int fileReader::hexToInt(const std::string &str) {
+    int ans;
+    sscanf(str.c_str(), "%x", &ans);
+    return ans;
+}
+
 void fileWriter::writeLittleInt(unsigned int data, int n) {
-    if(n % 8 != 0) {
+    if (n % 8 != 0) {
         throw std::runtime_error("n should be a multiple of 8 (fileWriter::writeLittleInt)");
     }
 
@@ -79,7 +91,7 @@ void fileWriter::writeLittleInt(unsigned int data, int n) {
 }
 
 void fileWriter::writeBigInt(unsigned int data, int n) {
-    if(n > 32){
+    if (n > 32) {
         throw std::runtime_error("n should be less than 32 (fileWriter::writeBigInt)");
     }
 
@@ -103,10 +115,4 @@ void fileWriter::closeWriter() {
     alignByte();
     output.flush();
     output.close();
-}
-
-std::string fileReader::intToHex(int num) {
-    std::stringstream stream;
-    stream << std::hex << num;  // Convert decimal to hexadecimal
-    return stream.str();  // Return the hexadecimal string
 }

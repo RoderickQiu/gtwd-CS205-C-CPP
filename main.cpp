@@ -10,23 +10,53 @@
 using namespace std;
 using namespace clipp;
 
+string parseMode(string mode) {
+    if (mode == "w2f") {
+        return "wav to flac";
+    } else if (mode == "f2w") {
+        return "flac to wav";
+    } else if (mode == "f2p") {
+        return "flac to pcm";
+    } else if (mode == "p2f") {
+        return "pcm to flac";
+    } else if (mode == "p2w") {
+        return "pcm to wav";
+    } else if (mode == "w2p") {
+        return "wav to pcm";
+    } else if (mode == "fm") {
+        return "flac metadata";
+    } else if (mode == "fe") {
+        return "flac metadata edit";
+    } else return "invalid mode";
+}
+
 int main(int argc, char **argv) {
     string mode, input, output, config;
-    auto cli = option("-m", "-M", "--mode") & (value("mode", mode),
-            option("-i", "-I", "--input") & value("input", input),
-            option("-o", "-O", "--output") & value("output", output),
-            option("-c", "-C", "--config") & value("config", config));
+    string modifyVendor, modifyComment, modifyCommentIndex, appendComment, removeCommentIndex;
+    auto cli = (
+            option("-m", "-M", "--mode") & value("mode", mode),
+                    option("-i", "-I", "--input") & value("input", input),
+                    option("-o", "-O", "--output") & value("output", output),
+                    option("-c", "-C", "--config") & value("config", config),
+                    option("-mv", "--modify-vendor") & value("modifyVendor", modifyVendor),
+                    option("-mc", "--modify-comment") & value("modifyComment", modifyComment)
+                    & value("commentIndex", modifyCommentIndex),
+                    option("-ac", "--append-comment") & value("appendComment", appendComment),
+                    option("-rc", "--remove-comment") & value("removeComment", removeCommentIndex)
+    );
     if (parse(argc, const_cast<char **>(argv), cli)) {
-        cout << "Mode: " << mode << endl;
-        cout << "Input: " << input << endl;
-        cout << "Output: " << output << endl;
+        cout << "Mode: " << parseMode(mode) << endl;
+        if (!input.empty())
+            cout << "Input: " << input << endl;
+        if (!output.empty())
+            cout << "Output: " << output << endl;
         if (mode == "w2f") { // wav to flac
             ifstream inputFile("./ProvidedDocuments/ovs.wav", ios::in | ios::binary);
             ofstream outputFile("./ProvidedDocuments/out.flac", ios::out | ios::trunc | ios::binary);
-            if(!inputFile.is_open()) {
+            if (!inputFile.is_open()) {
                 throw runtime_error("Error opening input file");
             }
-            if(!outputFile.is_open()) {
+            if (!outputFile.is_open()) {
                 throw runtime_error("Error opening output file");
             }
             fileReader reader(inputFile);
@@ -72,17 +102,62 @@ int main(int argc, char **argv) {
         } else if (mode == "p2f") {// pcm to flac
             cout << Pcm2wav::hello() << endl;
             cout << Wav2flac::hello() << endl;
-        } else if (mode == "fmeta") {
+        } else if (mode == "fm") {
             ifstream inputFile(input, ios::in | ios::binary);
             if (inputFile.is_open()) {
                 fileReader inStream = fileReader(inputFile);
                 FlacMetadata::interpretFile(inStream);
                 inputFile.close();
             } else {
-                throw runtime_error("Error opening file (main::main)");
+                throw runtime_error("Error opening input file (main::main)");
             }
+        } else if (mode == "fe") {
+            ifstream inputFile(input, ios::in | ios::binary);
+            ofstream outputFile(output, ios::out | ios::trunc | ios::binary);
+            if (!inputFile.is_open()) {
+                throw runtime_error("Error opening input file (main::main)");
+            }
+            if (!outputFile.is_open()) {
+                throw runtime_error("Error opening output file (main::main)");
+            }
+
+            FlacMetadata::MetaEditInfo metaEditInfo;
+            if (!modifyVendor.empty()) {
+                metaEditInfo.newVendorString = modifyVendor;
+                metaEditInfo.modifyVendorString = true;
+            }
+            if (!modifyComment.empty()) {
+                metaEditInfo.newComment = modifyComment;
+                metaEditInfo.modifyComment = true;
+                if (!modifyCommentIndex.empty()) {
+                    metaEditInfo.modifyCommentIndex = stoi(modifyCommentIndex);
+                } else {
+                    throw runtime_error("Error acquiring comment index for modifying (main::main)");
+                }
+            }
+            if (!appendComment.empty()) {
+                metaEditInfo.newComment = appendComment;
+                metaEditInfo.appendComment = true;
+            }
+            if (!removeCommentIndex.empty()) {
+                metaEditInfo.removeComment = true;
+                if (!removeCommentIndex.empty()) {
+                    metaEditInfo.removeCommentIndex = stoi(removeCommentIndex);
+                } else {
+                    throw runtime_error("Error acquiring comment index for removing (main::main)");
+                }
+            }
+
+            fileReader reader(inputFile);
+            fileWriter writer(outputFile);
+            try {
+                FlacMetadata::editFile(reader, writer, metaEditInfo);
+            } catch (exception &e) {
+                cout << e.what() << endl;
+            }
+            reader.closeReader();
         } else {
-            cout << "Invalid mode" << endl;
+            // Invalid mode
             return 1;
         }
     }

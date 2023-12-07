@@ -27,6 +27,8 @@ public:
 
     static std::string intToHex(int num);
 
+    static int hexToInt(const std::string &str);
+
     int readBigSInt(int n);
 
     void alignByte();
