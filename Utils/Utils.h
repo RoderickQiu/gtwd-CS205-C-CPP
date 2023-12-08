@@ -14,7 +14,7 @@ private:
     int inputBufferLength;
 
 public:
-    fileReader(std::ifstream &inStream) : input(inStream) {
+    explicit fileReader(std::ifstream &inStream) : input(inStream) {
         inputBuffer = 0;
         inputBufferLength = 0;
     }
@@ -42,7 +42,7 @@ private:
     unsigned long long outputBuffer;
     int outputBufferLength;
 public:
-    fileWriter(std::ofstream &outStream) : output(outStream) {
+    explicit fileWriter(std::ofstream &outStream) : output(outStream) {
         outputBuffer = 0;
         outputBufferLength = 0;
     }
