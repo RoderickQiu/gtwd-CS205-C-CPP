@@ -1,11 +1,11 @@
 #include <iostream>
-#include "Decoder/Pcm2wav.h"
-#include "Decoder/Wav2flac.h"
-#include "Encoder/Flac2wav.h"
-#include "Encoder/Wav2pcm.h"
-#include "Encoder/FlacMetadata.h"
-#include "Libraries/clipp.h"
-#include "Libraries/SimpleIni.h"
+#include "Pcm2wav.h"
+#include "Wav2flac.h"
+#include "Flac2wav.h"
+#include "Wav2pcm.h"
+#include "FlacMetadata.h"
+#include "clipp.h"
+#include "SimpleIni.h"
 
 using namespace std;
 using namespace clipp;
