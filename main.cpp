@@ -51,8 +51,8 @@ int main(int argc, char **argv) {
         if (!output.empty())
             cout << "Output: " << output << endl;
         if (mode == "w2f") { // wav to flac
-            ifstream inputFile("./ProvidedDocuments/ovs.wav", ios::in | ios::binary);
-            ofstream outputFile("./ProvidedDocuments/out.flac", ios::out | ios::trunc | ios::binary);
+            ifstream inputFile(input, ios::in | ios::binary);
+            ofstream outputFile(output, ios::out | ios::trunc | ios::binary);
             if (!inputFile.is_open()) {
                 throw runtime_error("Error opening input file");
             }

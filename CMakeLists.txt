@@ -3,13 +3,13 @@ project(gtwd)
 
 set(CMAKE_CXX_STANDARD 14)
 
-aux_source_directory(./Decoder Decoder_SOURCES)
-aux_source_directory(./Encoder Encoder_SOURCES)
+aux_source_directory(Encoder Decoder_SOURCES)
+aux_source_directory(Decoder Encoder_SOURCES)
 aux_source_directory(./Utils Utils_SOURCES)
 aux_source_directory(./Libraries Libraries_SOURCES)
 
-include_directories(Decoder)
 include_directories(Encoder)
+include_directories(Decoder)
 include_directories(Utils)
 include_directories(Libraries)
 
