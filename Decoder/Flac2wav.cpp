@@ -17,6 +17,7 @@ void Flac2wav::decodeFile(fileReader &in, fileWriter &out) {
     unsigned int numChannels = -1;
     unsigned int sampleDepth = -1;
     unsigned long long numSamples = -1;
+    unsigned int MD5[4];
     bool isLastBlock = false;
     while(!isLastBlock) {
         isLastBlock = in.readBigUInt(1);
@@ -32,10 +33,9 @@ void Flac2wav::decodeFile(fileReader &in, fileWriter &out) {
             numChannels = in.readBigUInt(3) + 1;
             sampleDepth = in.readBigUInt(5) + 1;
             numSamples = ((unsigned long long)in.readBigUInt(18)) << 18 | in.readBigUInt(18);
-            in.readBigUInt(32); // MD5 -- ignore
-            in.readBigUInt(32);
-            in.readBigUInt(32);
-            in.readBigUInt(32);
+            for (int i = 0; i < 4; ++i) {
+                MD5[i] = in.readBigUInt(32);
+            }
             cout<<"minBlockSize: "<<minBlockSize<<endl;
             cout<<"maxBlockSize: "<<maxBlockSize<<endl;
             cout<<"minFrameSize: "<<minFrameSize<<endl;
@@ -44,6 +44,10 @@ void Flac2wav::decodeFile(fileReader &in, fileWriter &out) {
             cout<<"numChannels: "<<numChannels<<endl;
             cout<<"sampleDepth: "<<sampleDepth<<endl;
             cout<<"numSamples: "<<numSamples<<endl;
+            cout<<"MD5: ";
+            for (int i = 0; i < 4; ++i) {
+                cout<<hex<<MD5[i]<<" ";
+            }
         } else {
             // discard metadata
             for (int i = 0; i < blockSize; ++i) {

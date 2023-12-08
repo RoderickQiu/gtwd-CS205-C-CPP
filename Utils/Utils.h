@@ -71,4 +71,16 @@ public:
     void closeWriter();
 };
 
+class fileCopier {
+private:
+    std::ifstream &input;
+    std::ofstream &output;
+public:
+    explicit fileCopier(std::ifstream &inStream, std::ofstream &outStream) : input(inStream), output(outStream) {}
+
+    void copyFile();
+
+    void closeCopier();
+};
+
 #endif //GTWD_UTILS_H

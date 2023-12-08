@@ -71,19 +71,38 @@ int main(int argc, char **argv) {
             reader.closeReader();
             writer.closeWriter();
         } else if (mode == "f2w") { // flac to wav
+            const char *tempFile = "../Temp/temp.wav";
             ifstream inputFile(input, ios::in | ios::binary);
-            ofstream outputFile(output, ios::out | ios::trunc | ios::binary);
-            if (!inputFile.is_open()) {
-                throw runtime_error("Error opening input file");
+            ofstream tempOutputFile(tempFile, ios::out | ios::trunc | ios::binary);
+            try{
+                if (!inputFile.is_open()) {
+                    throw runtime_error("Error opening input file");
+                }
+                if (!tempOutputFile.is_open()) {
+                    throw runtime_error("Error opening temp output file");
+                }
+                fileReader reader(inputFile);
+                fileWriter writer(tempOutputFile);
+                Flac2wav::decodeFile(reader, writer);
+                reader.closeReader();
+                writer.closeWriter();
+
+                ifstream tempInputFile(tempFile, ios::in | ios::binary);
+                ofstream outputFile(output, ios::out | ios::trunc | ios::binary);
+                if (!tempInputFile.is_open()) {
+                    throw runtime_error("Error opening temp input file");
+                }
+                if (!outputFile.is_open()) {
+                    throw runtime_error("Error opening output file");
+                }
+                fileCopier copier(tempInputFile, outputFile);
+                copier.copyFile();
+                copier.closeCopier();
+            } catch (exception &e) {
+                remove(tempFile);
+                throw e;
             }
-            if (!outputFile.is_open()) {
-                throw runtime_error("Error opening output file");
-            }
-            fileReader reader(inputFile);
-            fileWriter writer(outputFile);
-            Flac2wav::decodeFile(reader, writer);
-            reader.closeReader();
-            writer.closeWriter();
+            remove(tempFile);
         } else if (mode == "w2p") {// wav to pcm
             cout << Wav2pcm::hello() << endl;
         } else if (mode == "w2a") {// wav to aiff

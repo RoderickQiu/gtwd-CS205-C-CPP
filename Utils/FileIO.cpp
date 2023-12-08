@@ -13,7 +13,7 @@ unsigned int fileReader::readLittleUInt(int n) {
     }
 
     while (inputBufferLength < n) {
-        unsigned int temp = input.get(); // 从输入流中读取一个字节
+        unsigned int temp = input.get(); // one byte
         updateCRC8(temp);
         updateCRC16(temp);
         if (temp == EOF) {
@@ -41,7 +41,7 @@ unsigned int fileReader::readBigUInt(int n) {
     }
 
     while (inputBufferLength < n) {
-        unsigned int temp = input.get(); // 从输入流中读取一个字节
+        unsigned int temp = input.get(); // one byte
         updateCRC8(temp);
         updateCRC16(temp);
         if (temp == EOF) {
@@ -160,3 +160,21 @@ void fileWriter::closeWriter() {
     output.flush();
     output.close();
 }
+
+void fileCopier::copyFile() {
+    char temp;
+    while (true){
+        temp = (char)input.get();
+        if (temp == EOF) {
+            break;
+        }
+        output.put(temp);
+    }
+}
+
+void fileCopier::closeCopier() {
+    input.close();
+    output.close();
+}
+
+
