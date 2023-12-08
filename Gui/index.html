@@ -1,0 +1,168 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <meta charset="UTF-8">
+    <title>GTWD: Global Transcoder for Wav/fLaC Data</title>
+    <link rel="stylesheet" href="src/bootstrap.min.css">
+    <style>
+        html, body {
+            height: 100%;
+            width: 100%;
+        }
+
+        .tab-pane {
+            padding-top: 14px;
+            padding-left: 4px;
+        }
+    </style>
+</head>
+<body>
+<div class="container-fluid w-100 h-100 p-4 justify-content-center align-items-center flex">
+    <div id="app">
+        <ul class="nav nav-tabs" id="tab" role="tablist">
+            <li class="nav-item" role="presentation">
+                <button class="nav-link active" data-bs-toggle="tab" data-bs-target="#flac-meta"
+                        type="button" role="tab">Flac Meta
+                </button>
+            </li>
+            <li class="nav-item" role="presentation">
+                <button class="nav-link" data-bs-toggle="tab" data-bs-target="#flac-meta-edit"
+                        type="button" role="tab">Flac Meta Edit
+                </button>
+            </li>
+            <li class="nav-item" role="presentation">
+                <button class="nav-link" data-bs-toggle="tab" data-bs-target="#raw"
+                        type="button" role="tab">RAW Convert
+                </button>
+            </li>
+            <li class="nav-item" role="presentation">
+                <button class="nav-link" data-bs-toggle="tab" data-bs-target="#wav"
+                        type="button" role="tab">WAV Convert
+                </button>
+            </li>
+            <li class="nav-item" role="presentation">
+                <button class="nav-link" data-bs-toggle="tab" data-bs-target="#flac"
+                        type="button" role="tab">FLAC Convert
+                </button>
+            </li>
+        </ul>
+        <div class="tab-content overflow-scroll">
+            <div class="tab-pane fade show active" role="tabpanel" id="flac-meta">
+                <!-- Flac Meta Display -->
+                <label for="flac-meta-input" class="form-label">FLAC Source file: </label>
+                <div class="input-group">
+                    <input type="file" class="form-control" id="flac-meta-input" accept=".flac">
+                    <button id="flac-meta-submit" class="btn btn-primary d-inline-block">Submit</button>
+                </div>
+                <textarea class="form-control mt-4 w-100 overflow-scroll"
+                          id="flac-meta-result" rows="10"
+                          style="height: 510px;" readonly>
+                </textarea>
+            </div>
+            <div class="tab-pane fade" role="tabpanel" id="flac-meta-edit">
+                <!-- Flac Meta Edit -->
+                <label for="flac-meta-edit-input" class="form-label">FLAC Source file: </label>
+                <input type="file" class="form-control me-2" id="flac-meta-edit-input"
+                       accept=".flac" placeholder="Select a file">
+                <label for="alter-method" class="form-label mt-3">Altering method: </label>
+                <div id="alter-method" class="input-group">
+                    <button class="btn btn-outline-secondary dropdown-toggle" type="button" data-bs-toggle="dropdown"
+                            aria-expanded="false">Select mode
+                    </button>
+                    <ul class="dropdown-menu" id="alter-method-menu">
+                        <li><a class="dropdown-item" href="#">Modify vender</a></li>
+                        <li>
+                            <hr class="dropdown-divider">
+                        </li>
+                        <li><a class="dropdown-item" href="#">Modify comment</a></li>
+                        <li><a class="dropdown-item" href="#">Append comment</a></li>
+                        <li><a class="dropdown-item" href="#">Remove comment</a></li>
+                    </ul>
+                    <input type="text" class="form-control" id="flac-meta-edit-first"
+                           aria-label="Text input with dropdown button" placeholder="Select a mode first">
+                    <input type="text" class="form-control" id="flac-meta-edit-second"
+                           aria-label="Text input with dropdown button">
+                </div>
+                <label for="flac-meta-edit-input" class="form-label mt-3">FLAC Output directory: </label>
+                <div class="input-group">
+                    <input type="url" class="form-control" id="flac-meta-edit-output"
+                           placeholder="Please input a valid directory">
+                    <button id="flac-meta-edit-submit" class="btn btn-primary d-inline-block">Submit</button>
+                </div>
+                <textarea class="form-control mt-4 w-100 overflow-scroll"
+                          id="flac-meta-edit-result" rows="10"
+                          style="height:350px;" readonly>
+                </textarea>
+            </div>
+            <div class="tab-pane fade" role="tabpanel" id="raw">C</div>
+            <div class="tab-pane fade" role="tabpanel" id="wav">D</div>
+            <div class="tab-pane fade" role="tabpanel" id="flac">E</div>
+        </div>
+    </div>
+</div>
+<script src="src/bootstrap.bundle.min.js"></script>
+<script>
+    const {ipcRenderer} = require('electron');
+
+    // flac meta
+    document.getElementById("flac-meta-submit").addEventListener("click", function () {
+        let inFile = document.getElementById("flac-meta-input").files[0];
+        console.log(inFile.path);
+        ipcRenderer.send('exec', {mode: 'fm', input: inFile.path});
+    });
+
+    // flac meta edit
+    document.getElementById("flac-meta-edit-second").style.display = "none";
+    let mode = "";
+    document.getElementById("alter-method-menu").addEventListener("click", function (e) {
+        if (e.target.innerText === "Modify vender") {
+            mode = "mv";
+            document.getElementById("flac-meta-edit-first").placeholder = "Please input a valid vender";
+            document.getElementById("flac-meta-edit-second").style.display = "none";
+        } else if (e.target.innerText === "Modify comment") {
+            mode = "mc";
+            document.getElementById("flac-meta-edit-first").placeholder = "Please input a valid comment";
+            document.getElementById("flac-meta-edit-second").style.display = "initial";
+            document.getElementById("flac-meta-edit-second").placeholder = "Please input a valid index";
+        } else if (e.target.innerText === "Append comment") {
+            mode = "ac";
+            document.getElementById("flac-meta-edit-first").placeholder = "Please input a valid comment";
+            document.getElementById("flac-meta-edit-second").style.display = "none";
+            document.getElementById("flac-meta-edit-second").placeholder = "Please input a valid comment";
+        } else if (e.target.innerText === "Remove comment") {
+            mode = "rc";
+            document.getElementById("flac-meta-edit-first").placeholder = "Please input a valid index";
+            document.getElementById("flac-meta-edit-second").style.display = "none";
+        }
+        document.getElementById("alter-method").firstElementChild.innerText = e.target.innerText;
+    });
+    document.getElementById("flac-meta-edit-submit").addEventListener("click", function () {
+        let inFile = document.getElementById("flac-meta-edit-input").files[0].path.toString();
+        const fileName = inFile.substring(inFile.lastIndexOf('/') + 1);
+        let outDir = document.getElementById("flac-meta-edit-output").value;
+        if (outDir === "")
+            outDir = inFile.substring(0, inFile.lastIndexOf('/'));
+        if (outDir[outDir.length - 1] !== '/')
+            outDir += '/';
+        outDir += fileName;
+        ipcRenderer.send('exec', {
+            mode: 'fe',
+            input: inFile,
+            output: outDir,
+            alter: mode,
+            first: document.getElementById("flac-meta-edit-first").value,
+            second: document.getElementById("flac-meta-edit-second").value
+        });
+    });
+
+    // all the results
+    ipcRenderer.on('exec-reply', (event, arg) => {
+        if (arg.mode === 'fm') {
+            document.getElementById("flac-meta-result").value = arg.result;
+        } else if (arg.mode === 'fe') {
+            document.getElementById("flac-meta-edit-result").value = arg.result;
+        }
+    });
+</script>
+</body>
+</html>
