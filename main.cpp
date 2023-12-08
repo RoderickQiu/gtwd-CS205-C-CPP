@@ -3,6 +3,7 @@
 #include "Wav2flac.h"
 #include "Flac2wav.h"
 #include "Wav2pcm.h"
+#include "Wav2aiff.h"
 #include "FlacMetadata.h"
 #include "clipp.h"
 #include "SimpleIni.h"
@@ -10,7 +11,7 @@
 using namespace std;
 using namespace clipp;
 
-string parseMode(string mode) {
+string parseMode(const string &mode) {
     if (mode == "w2f") {
         return "wav to flac";
     } else if (mode == "f2w") {
@@ -27,7 +28,12 @@ string parseMode(string mode) {
         return "flac metadata";
     } else if (mode == "fe") {
         return "flac metadata edit";
-    } else return "invalid mode";
+    } else if (mode == "a2w") {
+        return "aiff to wav";
+    } else if (mode == "w2a") {
+        return "wav to aiff";
+    }
+    return "invalid mode";
 }
 
 int main(int argc, char **argv) {
@@ -80,6 +86,20 @@ int main(int argc, char **argv) {
             writer.closeWriter();
         } else if (mode == "w2p") {// wav to pcm
             cout << Wav2pcm::hello() << endl;
+        } else if (mode == "w2a") {// wav to aiff
+            ifstream inputFile(input, ios::in | ios::binary);
+            ofstream outputFile(output, ios::out | ios::trunc | ios::binary);
+            if (!inputFile.is_open()) {
+                throw runtime_error("Error opening input file");
+            }
+            if (!outputFile.is_open()) {
+                throw runtime_error("Error opening output file");
+            }
+            fileReader reader(inputFile);
+            fileWriter writer(outputFile);
+            Wav2aiff::encodeFile(reader, writer);
+            reader.closeReader();
+            writer.closeWriter();
         } else if (mode == "p2w") {// pcm to wav
             cout << Pcm2wav::hello() << endl;
             PcmConfig pcmConfig;
