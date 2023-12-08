@@ -78,6 +78,9 @@ void Flac2wav::decodeFile(fileReader &in, fileWriter &out) {
 }
 
 bool Flac2wav::decodeFrames(fileReader &in, fileWriter &out, unsigned int numChannels, unsigned int sampleDepth) {
+    in.resetCRC8();
+    in.resetCRC16();
+
     unsigned int syncCode;
     try {
         syncCode = in.readBigUInt(14);
@@ -137,7 +140,10 @@ bool Flac2wav::decodeFrames(fileReader &in, fileWriter &out, unsigned int numCha
         in.readBigUInt(16);
     }
 
-    unsigned int crc8 = in.readBigUInt(8);
+    in.readBigUInt(8); // CRC8
+    if(!in.checkCRC8()) {
+        throw std::runtime_error("CRC8 check failed (Flac2wav::decodeFrame)");
+    }
 
     unsigned int* samples[numChannels];
     for (int i = 0; i < numChannels; ++i) {
@@ -146,7 +152,10 @@ bool Flac2wav::decodeFrames(fileReader &in, fileWriter &out, unsigned int numCha
     decodeSubFrames(in, sampleDepth, channelAssignmentCode, numChannels, blockSize, samples);
     in.alignByte();
 
-    unsigned int crc16 = in.readBigUInt(16);
+    in.readBigUInt(16); // CRC16
+    if(!in.checkCRC16()) {
+        throw std::runtime_error("CRC16 check failed (Flac2wav::decodeFrame)");
+    }
 
     for (int i = 0; i < blockSize; ++i) {
         for (int j = 0; j < numChannels; ++j) {

@@ -14,6 +14,8 @@ unsigned int fileReader::readLittleUInt(int n) {
 
     while (inputBufferLength < n) {
         unsigned int temp = input.get(); // 从输入流中读取一个字节
+        updateCRC8(temp);
+        updateCRC16(temp);
         if (temp == EOF) {
             throw std::runtime_error("Reached end of file");
         }
@@ -40,6 +42,8 @@ unsigned int fileReader::readBigUInt(int n) {
 
     while (inputBufferLength < n) {
         unsigned int temp = input.get(); // 从输入流中读取一个字节
+        updateCRC8(temp);
+        updateCRC16(temp);
         if (temp == EOF) {
             throw std::runtime_error("Reached end of file");
         }
@@ -78,6 +82,46 @@ int fileReader::hexToInt(const std::string &str) {
     int ans;
     sscanf(str.c_str(), "%x", &ans);
     return ans;
+}
+
+void fileReader::updateCRC8(unsigned int data) {
+    const unsigned int CRC8_POLY = 0x107;
+    CRC8 ^= data;
+    for (int i = 0; i < 8; ++i) {
+        if (CRC8 & 0x80) {
+            CRC8 = (CRC8 << 1) ^ CRC8_POLY;
+        } else {
+            CRC8 <<= 1;
+        }
+    }
+}
+
+bool fileReader::checkCRC8() {
+    return CRC8 == 0;
+}
+
+void fileReader::resetCRC8() {
+    CRC8 = 0;
+}
+
+void fileReader::updateCRC16(unsigned int data) {
+    const unsigned int CRC16_POLY = 0x18005;
+    CRC16 ^= data << 8;
+    for (int i = 0; i < 8; ++i) {
+        if (CRC16 & 0x8000) {
+            CRC16 = (CRC16 << 1) ^ CRC16_POLY;
+        } else {
+            CRC16 <<= 1;
+        }
+    }
+}
+
+bool fileReader::checkCRC16() {
+    return CRC16 == 0;
+}
+
+void fileReader::resetCRC16() {
+    CRC16 = 0;
 }
 
 void fileWriter::writeLittleInt(unsigned int data, int n) {

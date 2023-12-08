@@ -12,11 +12,14 @@ private:
     std::ifstream &input;
     unsigned long long inputBuffer;
     int inputBufferLength;
-
+    unsigned int CRC8;
+    unsigned int CRC16;
 public:
     explicit fileReader(std::ifstream &inStream) : input(inStream) {
         inputBuffer = 0;
         inputBufferLength = 0;
+        CRC8 = 0;
+        CRC16 = 0;
     }
 
     unsigned int readLittleUInt(int n);
@@ -34,6 +37,18 @@ public:
     void alignByte();
 
     void closeReader();
+
+    void updateCRC8(unsigned int data);
+
+    void updateCRC16(unsigned int data);
+
+    bool checkCRC8();
+
+    bool checkCRC16();
+
+    void resetCRC8();
+
+    void resetCRC16();
 };
 
 class fileWriter {
