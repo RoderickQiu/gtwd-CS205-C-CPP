@@ -5,10 +5,11 @@
 #include "Wav2aiff.h"
 #include <iostream>
 #include <vector>
+#include <cstring>
 
 using namespace std;
 
-static std::unordered_map<uint32_t, std::vector<uint8_t>> aiffSampleRateTable = {
+static std::unordered_map<unsigned int, std::vector<unsigned char>> aiffSampleRateTable = {
         {8000,    {64, 11, 250, 0,   0, 0, 0, 0, 0, 0}},
         {11025,   {64, 12, 172, 68,  0, 0, 0, 0, 0, 0}},
         {16000,   {64, 12, 250, 0,   0, 0, 0, 0, 0, 0}},
@@ -30,7 +31,7 @@ static std::unordered_map<uint32_t, std::vector<uint8_t>> aiffSampleRateTable = 
         {5644800, {64, 21, 172, 68,  0, 0, 0, 0, 0, 0}}
 };
 
-void Wav2aiff::addSampleRate(uint32_t sampleRate, fileWriter &out) {
+void Wav2aiff::addSampleRate(unsigned int sampleRate, fileWriter &out) {
     if (aiffSampleRateTable.count(sampleRate) > 0) {
         for (int i = 0; i < 10; i++)
             out.writeBigInt(aiffSampleRateTable[sampleRate][i], 8);

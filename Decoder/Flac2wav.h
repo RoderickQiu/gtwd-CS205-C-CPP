@@ -8,11 +8,12 @@
 #include<string>
 #include<fstream>
 #include"Utils.h"
+#include"MD5.h"
 using namespace std;
 
 class Flac2wav {
     private:
-        static bool decodeFrames(fileReader& in, fileWriter& out, unsigned int numChannels, unsigned int sampleDepth);
+        static bool decodeFrames(fileReader& in, fileWriter& out, unsigned int numChannels, unsigned int sampleDepth, MD5& md5);
         static void decodeSubFrames(fileReader& in, unsigned int sampleDepth, unsigned int channelAssignment, unsigned int numChannels, unsigned int blockSize, unsigned int* samples[]);
         static void decodeSubFrame(fileReader& in, unsigned int sampleDepth, unsigned int blockSize, long long result[]);
     public:

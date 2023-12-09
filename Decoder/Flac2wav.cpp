@@ -4,6 +4,7 @@
 
 #include "Flac2wav.h"
 #include <cstring>
+#include "MD5.h"
 
 void Flac2wav::decodeFile(fileReader &in, fileWriter &out) {
     if(in.readBigUInt(32) != 0x664c6143) {
@@ -17,7 +18,7 @@ void Flac2wav::decodeFile(fileReader &in, fileWriter &out) {
     unsigned int numChannels = -1;
     unsigned int sampleDepth = -1;
     unsigned long long numSamples = -1;
-    unsigned int MD5[4];
+    unsigned int MD5Code[4];
     bool isLastBlock = false;
     while(!isLastBlock) {
         isLastBlock = in.readBigUInt(1);
@@ -34,7 +35,7 @@ void Flac2wav::decodeFile(fileReader &in, fileWriter &out) {
             sampleDepth = in.readBigUInt(5) + 1;
             numSamples = ((unsigned long long)in.readBigUInt(18)) << 18 | in.readBigUInt(18);
             for (int i = 0; i < 4; ++i) {
-                MD5[i] = in.readBigUInt(32);
+                MD5Code[i] = in.readBigUInt(32);
             }
             cout<<"minBlockSize: "<<minBlockSize<<endl;
             cout<<"maxBlockSize: "<<maxBlockSize<<endl;
@@ -44,10 +45,11 @@ void Flac2wav::decodeFile(fileReader &in, fileWriter &out) {
             cout<<"numChannels: "<<numChannels<<endl;
             cout<<"sampleDepth: "<<sampleDepth<<endl;
             cout<<"numSamples: "<<numSamples<<endl;
-            cout<<"MD5: ";
+            cout<<"MD5Code: ";
             for (int i = 0; i < 4; ++i) {
-                cout<<hex<<MD5[i]<<" ";
+                cout << hex << MD5Code[i] << " ";
             }
+            cout<<endl;
         } else {
             // discard metadata
             for (int i = 0; i < blockSize; ++i) {
@@ -78,10 +80,17 @@ void Flac2wav::decodeFile(fileReader &in, fileWriter &out) {
     out.writeBigInt(0x64617461, 32); // "data"
     out.writeLittleInt((int)sampleDataLength, 32); // data chunk size
 
-    while(decodeFrames(in, out, numChannels, sampleDepth));
+    MD5 md5;
+
+    while(decodeFrames(in, out, numChannels, sampleDepth, md5));
+
+    md5.finalizeMD5();
+    if(!md5.checkMD5(MD5Code)) {
+        throw std::runtime_error("MD5Code check failed (Flac2wav::decodeFile)");
+    }
 }
 
-bool Flac2wav::decodeFrames(fileReader &in, fileWriter &out, unsigned int numChannels, unsigned int sampleDepth) {
+bool Flac2wav::decodeFrames(fileReader &in, fileWriter &out, unsigned int numChannels, unsigned int sampleDepth, MD5 &md5) {
     in.resetCRC8();
     in.resetCRC16();
 
@@ -164,6 +173,9 @@ bool Flac2wav::decodeFrames(fileReader &in, fileWriter &out, unsigned int numCha
     for (int i = 0; i < blockSize; ++i) {
         for (int j = 0; j < numChannels; ++j) {
             out.writeLittleInt(samples[j][i], (int)sampleDepth);
+            for (int k = 0; k < sampleDepth / 8; ++k) {
+                md5.updateMD5((unsigned char)(samples[j][i] >> (k * 8)));
+            }
         }
     }
 
