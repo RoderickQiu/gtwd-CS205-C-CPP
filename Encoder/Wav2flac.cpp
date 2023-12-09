@@ -102,4 +102,4 @@ void Wav2flac::encodeFile(fileReader &in, fileWriter &out) {
     out.writeBigInt(0, 24);
 }
 
-risComment()
+//risComment()

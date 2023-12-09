@@ -162,13 +162,13 @@ void fileWriter::closeWriter() {
 }
 
 void fileCopier::copyFile() {
-    char temp;
+    unsigned int temp;
     while (true){
-        temp = (char)input.get();
+        temp = input.get();
         if (temp == EOF) {
             break;
         }
-        output.put(temp);
+        output.put((char)temp);
     }
 }
 

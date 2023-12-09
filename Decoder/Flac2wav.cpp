@@ -4,6 +4,7 @@
 
 #include "Flac2wav.h"
 #include <cstring>
+#include <iomanip>
 #include "MD5.h"
 
 void Flac2wav::decodeFile(fileReader &in, fileWriter &out) {
@@ -47,7 +48,7 @@ void Flac2wav::decodeFile(fileReader &in, fileWriter &out) {
             cout<<"numSamples: "<<numSamples<<endl;
             cout<<"MD5Code: ";
             for (int i = 0; i < 4; ++i) {
-                cout << hex << MD5Code[i] << " ";
+                cout << setw(8) << setfill('0') << hex << MD5Code[i] << " ";
             }
             cout<<endl;
         } else {

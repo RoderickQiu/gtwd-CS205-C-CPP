@@ -3,6 +3,7 @@
 //
 
 #include "MD5.h"
+#include <iomanip>
 
 static unsigned int S[] = {  7, 12, 17, 22, 7, 12, 17, 22, 7, 12, 17, 22, 7, 12, 17, 22,
                              5,  9, 14, 20, 5,  9, 14, 20, 5,  9, 14, 20, 5,  9, 14, 20,
@@ -106,7 +107,7 @@ void MD5::printMD5() {
     }
 
     for (unsigned int i : MD5_result) {
-        std::cout<<std::hex<<i<<" ";
+        std::cout << std::setw(8) << std::setfill('0') << std::hex << i;
     }
 }
 
