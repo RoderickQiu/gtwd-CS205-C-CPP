@@ -177,4 +177,8 @@ void fileCopier::closeCopier() {
     output.close();
 }
 
-
+void fileWriter::writeStr(std::string str) {
+    for(int i = 0; i < str.length(); i++){
+        fileWriter::writeBigInt((unsigned int)str[i], 8);
+    }
+}

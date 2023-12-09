@@ -69,6 +69,8 @@ public:
     void alignByte();
 
     void closeWriter();
+
+    void writeStr(std::string str);
 };
 
 class fileCopier {

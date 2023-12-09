@@ -7,6 +7,7 @@
 
 #include<string>
 #include<fstream>
+#include<unordered_map>
 #include "../Utils/Utils.h"
 
 using namespace std;
@@ -20,6 +21,5 @@ public:
     static void encodeFile(fileReader &in, fileWriter &out);
 
 };
-
 
 #endif //GTWD_WAV2FLAC_H

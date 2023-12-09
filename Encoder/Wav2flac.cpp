@@ -3,7 +3,10 @@
 //
 
 #include "Wav2flac.h"
+#include "FlacMetadata.h"
 #include<fstream>
+
+void setMetadata();
 
 void Wav2flac::encodeFile(fileReader &in, fileWriter &out) {
     cout << "Wav2flac::encodeFile: called" << endl;
@@ -36,12 +39,12 @@ void Wav2flac::encodeFile(fileReader &in, fileWriter &out) {
     }
     cout << "Wav2flac::encodeFile: valid WAV file format" << endl;
     channels = in.readLittleUInt(16);
-    if (channels < 0 || channels > 2) {
+    if (channels <= 0 || channels > 2) {
         throw runtime_error("Invalid WAV file channel count (Wav2flac::encodeFile)");
     }
     cout << "Wav2flac::encodeFile: WAV file channel count = " << channels << endl;
     sampleRate = in.readLittleUInt(32);
-    if (sampleRate <= 0 || sampleRate >= (1 << 20)) {
+    if (sampleRate <= 0 || sampleRate > 655350) {
         throw runtime_error("Invalid WAV file sample rate (Wav2flac::encodeFile)");
     }
     cout << "Wav2flac::encodeFile: WAV file sample rate = " << sampleRate << " Hz" << endl;
@@ -66,11 +69,37 @@ void Wav2flac::encodeFile(fileReader &in, fileWriter &out) {
         }
         cout << endl;
     }*/
-
     // Encoding FLAC file
     // header
     out.writeBigInt(0x664c6143, 32); // "fLaC"
+
+    // Metadata block
+    // SREAMINFO
+    out.writeBigInt(0, 1); // not last
+    out.writeBigInt(0, 7); // stream info block
+    out.writeBigInt(272, 24);// block size
+    out.writeBigInt(0, 16);// minimum block size ?
+    out.writeBigInt(0, 16);// maximum block size ?
+    out.writeBigInt(0, 24);// minimum frame size ?
+    out.writeBigInt(0, 24);// maximum frame size ?
+    out.writeBigInt(sampleRate, 20);// sample rate in Hz, max = 655350, 0 is invalid
+    out.writeBigInt(channels, 3); // number of channels
+    out.writeBigInt(bitsPerSample, 5); // bits per sample
+    out.writeBigInt(totalSampleLength, 36); // total samples per stream
+    out.writeBigInt(0, 128); // MD5 signature ?
+
+    // VORBIS_COMMENT
+    out.writeBigInt(1, 1); // last
+    out.writeBigInt(1, 7); // vorbis comment block
+    out.writeBigInt(0, 24); // block size
+    out.writeLittleInt(40, 32); // vendor length
+    out.writeStr("UTF-8"); // "UTF-8"
+    out.writeLittleInt(1, 32); // user comment list length
+//    out.writeStr()
+
     out.writeBigInt(0, 1); // last block
     out.writeBigInt(0, 7);
     out.writeBigInt(0, 24);
 }
+
+risComment()
