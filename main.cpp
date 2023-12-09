@@ -1,4 +1,5 @@
 #include <iostream>
+#include <chrono>
 #include "Pcm2wav.h"
 #include "Wav2flac.h"
 #include "Flac2wav.h"
@@ -36,6 +37,8 @@ string parseMode(const string &mode) {
     return "invalid mode";
 }
 
+string generateRandomString(int length);
+
 int main(int argc, char **argv) {
     string mode, input, output, config;
     string modifyVendor, modifyComment, modifyCommentIndex, appendComment, removeCommentIndex;
@@ -71,38 +74,40 @@ int main(int argc, char **argv) {
             reader.closeReader();
             writer.closeWriter();
         } else if (mode == "f2w") { // flac to wav
-            const char *tempFile = "../Temp/temp.wav";
+            char tmpname[FILENAME_MAX];
+            char *tev = getenv("TMPDIR");
+            if (!tev) tev = getenv("TEMP");
+            strcpy(tmpname, tev);
+#ifdef WIN32
+            strcat(tmpname, "\\");
+            strcat(tmpname, generateRandomString(7).c_str());
+#else
+            strcat(tmpname, "XXXXXXX");
+#endif
+            int fd = mkstemp(tmpname);
+            cout << "Temp file: " << tmpname << fd << endl;
             ifstream inputFile(input, ios::in | ios::binary);
-            ofstream tempOutputFile(tempFile, ios::out | ios::trunc | ios::binary);
+            ofstream tempOutputFile(tmpname, ios::out | ios::trunc | ios::binary);
             try {
-                if (!inputFile.is_open()) {
-                    throw runtime_error("Error opening input file");
-                }
-                if (!tempOutputFile.is_open()) {
-                    throw runtime_error("Error opening temp output file");
-                }
+                if (!inputFile.is_open()) { throw runtime_error("Error opening input file"); }
+                if (!tempOutputFile.is_open()) { throw runtime_error("Error opening temp output file"); }
                 fileReader reader(inputFile);
                 fileWriter writer(tempOutputFile);
                 Flac2wav::decodeFile(reader, writer);
                 reader.closeReader();
                 writer.closeWriter();
-
-                ifstream tempInputFile(tempFile, ios::in | ios::binary);
+                ifstream tempInputFile(tmpname, ios::in | ios::binary);
                 ofstream outputFile(output, ios::out | ios::trunc | ios::binary);
-                if (!tempInputFile.is_open()) {
-                    throw runtime_error("Error opening temp input file");
-                }
-                if (!outputFile.is_open()) {
-                    throw runtime_error("Error opening output file");
-                }
+                if (!tempInputFile.is_open()) { throw runtime_error("Error opening temp input file"); }
+                if (!outputFile.is_open()) { throw runtime_error("Error opening output file"); }
                 fileCopier copier(tempInputFile, outputFile);
                 copier.copyFile();
                 copier.closeCopier();
             } catch (exception &e) {
-                remove(tempFile);
+                remove(tmpname);
                 throw runtime_error(e.what());
             }
-            remove(tempFile);
+            remove(tmpname);
         } else if (mode == "w2p") {// wav to pcm
             cout << Wav2pcm::hello() << endl;
         } else if (mode == "w2a") {// wav to aiff
@@ -201,4 +206,14 @@ int main(int argc, char **argv) {
         }
     }
     return 0;
+}
+
+string generateRandomString(int length) {
+    srand(static_cast<unsigned int>(std::time(nullptr)));
+    const string charset = "abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789";
+    string result;
+    for (int i = 0; i < length; ++i) {
+        result += charset[rand() % charset.size()];
+    }
+    return result;
 }
