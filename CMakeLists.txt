@@ -1,7 +1,7 @@
 cmake_minimum_required(VERSION 3.16.3)
 project(gtwd)
 
-set(CMAKE_CXX_STANDARD 14)
+set(CMAKE_CXX_STANDARD 17)
 
 aux_source_directory(Decoder Decoder_SOURCES)
 aux_source_directory(Encoder Encoder_SOURCES)

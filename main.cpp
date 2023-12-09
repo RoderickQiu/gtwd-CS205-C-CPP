@@ -7,6 +7,7 @@
 #include "FlacMetadata.h"
 #include "clipp.h"
 #include "SimpleIni.h"
+#include "tempfile.h"
 
 using namespace std;
 using namespace clipp;
@@ -71,10 +72,12 @@ int main(int argc, char **argv) {
             reader.closeReader();
             writer.closeWriter();
         } else if (mode == "f2w") { // flac to wav
-            const char *tempFile = "../Temp/temp.wav";
+            string tempFileStr = TempFile("f2w").string();
+            cout << "Temp file: " << tempFileStr << endl;
+            const char *tempFile = tempFileStr.c_str();
             ifstream inputFile(input, ios::in | ios::binary);
             ofstream tempOutputFile(tempFile, ios::out | ios::trunc | ios::binary);
-            try{
+            try {
                 if (!inputFile.is_open()) {
                     throw runtime_error("Error opening input file");
                 }
@@ -100,7 +103,7 @@ int main(int argc, char **argv) {
                 copier.closeCopier();
             } catch (exception &e) {
                 remove(tempFile);
-                throw e;
+                throw runtime_error(e.what());
             }
             remove(tempFile);
         } else if (mode == "w2p") {// wav to pcm

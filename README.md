@@ -1,6 +1,6 @@
 # GTWD
 
-> **G**lobal **T**ranscoder for **W**av/FLAC **D**ata
+> **G**lobal **T**ranscoder for **W**AV/FLAC/AIFF **D**ata
 
 Actually originated in the famous saying:
 
