@@ -16,8 +16,6 @@ public:
     static void encodeFile(fileReader &in, fileWriter &out);
 
     static void addSampleRate(unsigned int sampleRate, fileWriter &out);
-
-    static void writeFromStr(const std::string &s, fileWriter &out);
 };
 
 

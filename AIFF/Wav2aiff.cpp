@@ -5,11 +5,12 @@
 #include "Wav2aiff.h"
 #include <iostream>
 #include <vector>
+#include <unordered_map>
 #include <cstring>
 
 using namespace std;
 
-static std::unordered_map<unsigned int, std::vector<unsigned char>> aiffSampleRateTable = {
+static unordered_map<unsigned int, vector<unsigned char>> aiffSampleRateTable = {
         {8000,    {64, 11, 250, 0,   0, 0, 0, 0, 0, 0}},
         {11025,   {64, 12, 172, 68,  0, 0, 0, 0, 0, 0}},
         {16000,   {64, 12, 250, 0,   0, 0, 0, 0, 0, 0}},
@@ -84,6 +85,9 @@ void Wav2aiff::encodeFile(fileReader &in, fileWriter &out) {
     blockAlign = in.readLittleUInt(16);
     cout << "Wav2aiff::encodeFile: WAV file blockAlign = " << blockAlign << " bytes" << endl;
     bitsPerSample = in.readLittleUInt(16);
+    if (bitsPerSample != 16 && bitsPerSample != 24 && bitsPerSample != 32) {
+        throw runtime_error("Only support 16/24/32 bits per sample (Wav2aiff::encodeFile)");
+    }
     cout << "Wav2aiff::encodeFile: WAV file bits per sample = " << bitsPerSample << " bits" << endl;
     if (in.readBigUInt(32) != 0x64617461) {
         throw runtime_error("Invalid WAV file data chunk header 'data' (Wav2aiff::encodeFile)");

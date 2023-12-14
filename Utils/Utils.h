@@ -71,6 +71,8 @@ public:
     void closeWriter();
 
     void writeStr(std::string str);
+
+    static std::string uint32ToString(unsigned int value);
 };
 
 class fileCopier {

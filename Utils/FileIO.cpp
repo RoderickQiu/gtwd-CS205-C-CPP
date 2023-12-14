@@ -148,6 +148,27 @@ void fileWriter::writeBigInt(unsigned int data, int n) {
     }
 }
 
+std::string fileWriter::uint32ToString(unsigned int value) {
+    std::stringstream ss;
+    ss << std::hex << std::setw(8) << std::setfill('0') << value; // Convert to 8-character hex representation
+    std::string hexString = ss.str();
+
+    std::string asciiString;
+    for (size_t i = 0; i < hexString.length(); i += 2) {
+        std::string byte = hexString.substr(i, 2);
+        char chr = (char) std::stoul(byte, nullptr, 16);
+        asciiString.push_back(chr);
+    }
+
+    return asciiString;
+}
+
+void fileWriter::writeStr(std::string str) {
+    for (int i = 0; i < str.length(); i++) {
+        fileWriter::writeBigInt((unsigned int) str[i], 8);
+    }
+}
+
 void fileWriter::alignByte() {
     // This function should only be used in wav2flac
     if (outputBufferLength > 0) {
@@ -163,22 +184,16 @@ void fileWriter::closeWriter() {
 
 void fileCopier::copyFile() {
     unsigned int temp;
-    while (true){
+    while (true) {
         temp = input.get();
         if (temp == EOF) {
             break;
         }
-        output.put((char)temp);
+        output.put((char) temp);
     }
 }
 
 void fileCopier::closeCopier() {
     input.close();
     output.close();
-}
-
-void fileWriter::writeStr(std::string str) {
-    for(int i = 0; i < str.length(); i++){
-        fileWriter::writeBigInt((unsigned int)str[i], 8);
-    }
 }
