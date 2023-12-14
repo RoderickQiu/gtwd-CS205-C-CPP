@@ -6,6 +6,7 @@
 #include <fstream>
 #include <string>
 #include <sstream>
+#include <iomanip>
 
 unsigned int fileReader::readLittleUInt(int n) {
     if (n > 32) {

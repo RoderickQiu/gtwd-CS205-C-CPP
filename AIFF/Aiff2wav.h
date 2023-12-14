@@ -2,6 +2,7 @@
 #define TEMP_WAV_AIFF2WAV_H
 
 #include "../Utils/Utils.h"
+#include <vector>
 
 using namespace std;
 
