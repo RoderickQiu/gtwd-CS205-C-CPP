@@ -14,6 +14,10 @@
             padding-top: 14px;
             padding-left: 4px;
         }
+
+        textarea {
+            resize: none;
+        }
     </style>
 </head>
 <body>
@@ -31,18 +35,8 @@
                 </button>
             </li>
             <li class="nav-item" role="presentation">
-                <button class="nav-link" data-bs-toggle="tab" data-bs-target="#raw"
-                        type="button" role="tab">RAW Convert
-                </button>
-            </li>
-            <li class="nav-item" role="presentation">
-                <button class="nav-link" data-bs-toggle="tab" data-bs-target="#wav"
-                        type="button" role="tab">WAV Convert
-                </button>
-            </li>
-            <li class="nav-item" role="presentation">
-                <button class="nav-link" data-bs-toggle="tab" data-bs-target="#flac"
-                        type="button" role="tab">FLAC Convert
+                <button class="nav-link" data-bs-toggle="tab" data-bs-target="#convert"
+                        type="button" role="tab">Convertor
                 </button>
             </li>
         </ul>
@@ -56,7 +50,7 @@
                 </div>
                 <textarea class="form-control mt-4 w-100 overflow-scroll"
                           id="flac-meta-result" rows="10"
-                          style="height: 510px;" readonly>
+                          style="height: 515px;" readonly>
                 </textarea>
             </div>
             <div class="tab-pane fade" role="tabpanel" id="flac-meta-edit">
@@ -83,20 +77,42 @@
                     <input type="text" class="form-control" id="flac-meta-edit-second"
                            aria-label="Text input with dropdown button">
                 </div>
-                <label for="flac-meta-edit-input" class="form-label mt-3">FLAC Output directory: </label>
+                <label for="flac-meta-edit-output" class="form-label mt-3">FLAC Output directory: </label>
                 <div class="input-group">
                     <input type="url" class="form-control" id="flac-meta-edit-output"
-                           placeholder="Please input a valid directory">
+                           placeholder="Please input a valid directory, or blank for same folder">
                     <button id="flac-meta-edit-submit" class="btn btn-primary d-inline-block">Submit</button>
                 </div>
                 <textarea class="form-control mt-4 w-100 overflow-scroll"
                           id="flac-meta-edit-result" rows="10"
-                          style="height:350px;" readonly>
+                          style="height:345px;" readonly>
                 </textarea>
             </div>
-            <div class="tab-pane fade" role="tabpanel" id="raw">C</div>
-            <div class="tab-pane fade" role="tabpanel" id="wav">D</div>
-            <div class="tab-pane fade" role="tabpanel" id="flac">E</div>
+            <div class="tab-pane fade" role="tabpanel" id="convert">
+                <!-- Convertor -->
+                <label for="conv-input" class="form-label">Source file: </label>
+                <input type="file" class="form-control me-2" id="conv-input"
+                       accept=".flac, .wav, .aif, .aiff, .pcm, .raw" placeholder="Select a file">
+                <label for="conv-output" class="form-label mt-3">Convert into & output directory: </label>
+                <div class="input-group" id="conv-set">
+                    <button class="btn btn-outline-secondary dropdown-toggle" type="button"
+                            data-bs-toggle="dropdown" aria-expanded="false">Convert into
+                    </button>
+                    <ul class="dropdown-menu" id="conv-menu">
+                        <li><a class="dropdown-item" href="#">RAW</a></li>
+                        <li><a class="dropdown-item" href="#">WAV</a></li>
+                        <li><a class="dropdown-item" href="#">FLAC</a></li>
+                        <li><a class="dropdown-item" href="#">AIFF</a></li>
+                    </ul>
+                    <input type="url" class="form-control" id="conv-output"
+                           placeholder="Please input a valid directory, or blank for same folder">
+                    <button id="conv-submit" class="btn btn-primary d-inline-block">Submit</button>
+                </div>
+                <textarea class="form-control mt-4 w-100 overflow-scroll"
+                          id="conv-result" rows="10"
+                          style="height:430px;" readonly>
+                </textarea>
+            </div>
         </div>
     </div>
 </div>
@@ -137,6 +153,8 @@
         document.getElementById("alter-method").firstElementChild.innerText = e.target.innerText;
     });
     document.getElementById("flac-meta-edit-submit").addEventListener("click", function () {
+        if (mode === "")
+            alert("Please select a mode first!");
         let inFile = document.getElementById("flac-meta-edit-input").files[0].path.toString();
         const fileName = inFile.substring(inFile.lastIndexOf('/') + 1);
         let outDir = document.getElementById("flac-meta-edit-output").value;
@@ -144,7 +162,7 @@
             outDir = inFile.substring(0, inFile.lastIndexOf('/'));
         if (outDir[outDir.length - 1] !== '/')
             outDir += '/';
-        outDir += fileName;
+        outDir += "output_" + fileName.toString();
         ipcRenderer.send('exec', {
             mode: 'fe',
             input: inFile,
@@ -155,12 +173,42 @@
         });
     });
 
+    // convertor
+    let into = "";
+    document.getElementById("conv-menu").addEventListener("click", function (e) {
+        document.getElementById("conv-set").firstElementChild.innerText = e.target.innerText;
+        into = e.target.innerText.toLowerCase();
+    });
+    document.getElementById("conv-submit").addEventListener("click", function (e) {
+        let inFile = document.getElementById("conv-input").files[0].path.toString();
+        const fileName = inFile.substring(inFile.lastIndexOf('/') + 1);
+        const inType = fileName.substring(fileName.lastIndexOf('.') + 1);
+        let outDir = document.getElementById("conv-output").value;
+        if (outDir === "")
+            outDir = inFile.substring(0, inFile.lastIndexOf('/'));
+        if (outDir[outDir.length - 1] !== '/')
+            outDir += '/';
+        outDir += "output_" + fileName.toString().replace(inType, into);
+        if (inType === into) {
+            alert("Please select a different type!");
+            return;
+        }
+        let modeText = inType[0] + "2" + into[0];
+        ipcRenderer.send('exec', {
+            mode: modeText,
+            input: inFile,
+            output: outDir
+        });
+    });
+
     // all the results
     ipcRenderer.on('exec-reply', (event, arg) => {
         if (arg.mode === 'fm') {
             document.getElementById("flac-meta-result").value = arg.result;
         } else if (arg.mode === 'fe') {
             document.getElementById("flac-meta-edit-result").value = arg.result;
+        } else {
+            document.getElementById("conv-result").value = arg.result;
         }
     });
 </script>
