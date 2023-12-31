@@ -26,9 +26,15 @@ public:
 
     unsigned int readBigUInt(int n);
 
+    unsigned long long readBigULongLong(int n);
+
     int readLittleSInt(int n);
 
     static std::string intToHex(int num);
+
+    static std::string intToHex(unsigned int num);
+
+    static std::string longLongToHex(unsigned long long num);
 
     static int hexToInt(const std::string &str);
 
@@ -65,6 +71,8 @@ public:
     void writeLittleInt(unsigned int data, int n);
 
     void writeBigInt(unsigned int data, int n);
+
+    void writeBigLongLong(unsigned long long data, int n);
 
     void alignByte();
 

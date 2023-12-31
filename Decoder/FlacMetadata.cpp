@@ -3,6 +3,7 @@
 //
 
 #include "FlacMetadata.h"
+#include "Utils.h"
 #include <iostream>
 #include <vector>
 #include <cstring>
@@ -17,6 +18,7 @@ FlacMetadata::FlacMetadataInfo FlacMetadata::interpretFile(fileReader &in) {
     cout << "-----------------" << endl;
     cout << "FLAC Metadata: " << endl;
     FlacMetadataInfo info;
+    vector<FlacMetadataHeader> headers;
     unsigned int maxBlockSize = -1;
     unsigned int minBlockSize = -1;
     unsigned int maxFrameSize = -1;
@@ -29,8 +31,13 @@ FlacMetadata::FlacMetadataInfo FlacMetadata::interpretFile(fileReader &in) {
     bool isLastBlock = false;
     while (!isLastBlock) {
         isLastBlock = in.readBigUInt(1);
-        int blockType = in.readBigUInt(7);
-        int blockSize = in.readBigUInt(24);
+        unsigned int blockType = in.readBigUInt(7);
+        unsigned int blockSize = in.readBigUInt(24);
+        FlacMetadataHeader header;
+        header.blockType = blockType;
+        header.blockSize = blockSize;
+        header.isLast = isLastBlock;
+        headers.push_back(header);
         /*
          * 0 : STREAMINFO
          * 1 : PADDING
@@ -40,8 +47,7 @@ FlacMetadata::FlacMetadataInfo FlacMetadata::interpretFile(fileReader &in) {
          * 5 : CUESHEET
          * 6 : PICTURE
          */
-        if (blockType == 0) {//streaminfo
-            info.infoBlockSize = blockSize;
+        if (blockType == 0) { // streaminfo
             minBlockSize = in.readBigUInt(16);
             maxBlockSize = in.readBigUInt(16);
             minFrameSize = in.readBigUInt(24);
@@ -75,7 +81,37 @@ FlacMetadata::FlacMetadataInfo FlacMetadata::interpretFile(fileReader &in) {
             info.md5[1] = md5[1];
             info.md5[2] = md5[2];
             info.md5[3] = md5[3];
-        } else if (blockType == 4) {//vorbis_comment
+        } else if (blockType == 2) { // application
+            info.applicationBlockSize = blockSize;
+            info.applicationId = in.readBigUInt(32);
+            cout << "application: " << fileWriter::uint32ToString(info.applicationId) << endl;
+            for (int i = 0; i < blockSize - 4; i++) {
+                info.applicationDataOriginal.push_back(in.readBigUInt(8));
+            }
+            string applicationData(info.applicationDataOriginal.begin(), info.applicationDataOriginal.end());
+            if (applicationData.size() > 1000)
+                cout << "application data: " << applicationData.substr(0, 1000)
+                     << "... (too long, skip showing)" << endl;
+            else
+                cout << "application data: " << applicationData << endl;
+        } else if (blockType == 3) { // seek table
+            info.seekPointsCnt = blockSize / (8 + 8 + 2);
+            cout << "seekTablesCount: " << info.seekPointsCnt << endl;
+            for (int i = 0; i < info.seekPointsCnt; i++) {
+                FlacSeekPoint seekPoint;
+                seekPoint.sampleFirst = in.readBigULongLong(64);
+                seekPoint.offset = in.readBigULongLong(64);
+                seekPoint.sampleNum = in.readBigUInt(16);
+                string sampleFirstHex = fileReader::longLongToHex(seekPoint.sampleFirst);
+                info.seekPoints.push_back(seekPoint);
+                if (sampleFirstHex != "ffffffffffffffff") {
+                    cout << "seekPoint " << i << ": "
+                         << sampleFirstHex << ", "
+                         << fileReader::longLongToHex(seekPoint.offset) << ", "
+                         << seekPoint.sampleNum << endl;
+                }
+            }
+        } else if (blockType == 4) { // vorbis comment
             // Note that the 32-bit field lengths are little-endian coded according to the vorbis spec
             // as opposed to the usual big-endian coding of fixed-length integers in the rest of FLAC.
             info.commentBlockSize = blockSize;
@@ -85,7 +121,7 @@ FlacMetadata::FlacMetadataInfo FlacMetadata::interpretFile(fileReader &in) {
             for (int i = 0; i < vendorLength; ++i) {
                 vendor.push_back(in.readLittleUInt(8));
             }
-            std::string vendorString(vendor.begin(), vendor.end());
+            string vendorString(vendor.begin(), vendor.end());
             cout << "vendor: " << vendorString << endl;
             info.vendorString = vendorString;
             info.vendorStringOriginal = vendor;
@@ -99,7 +135,7 @@ FlacMetadata::FlacMetadataInfo FlacMetadata::interpretFile(fileReader &in) {
                 for (int j = 0; j < commentLength; ++j) {
                     comment.push_back(in.readLittleUInt(8));
                 }
-                std::string commentString(comment.begin(), comment.end());
+                string commentString(comment.begin(), comment.end());
                 cout << "comment " << i << ": " << commentString << endl;
                 info.commentList.push_back(commentString);
                 info.commentsOriginal.push_back(comment);
@@ -110,6 +146,7 @@ FlacMetadata::FlacMetadataInfo FlacMetadata::interpretFile(fileReader &in) {
             }
         }
     }
+    info.headers = headers;
     return info;
 }
 
@@ -119,9 +156,11 @@ void FlacMetadata::editFile(fileReader &in, fileWriter &out, MetaEditInfo meta) 
     cout << "Flac metadata edit into: " << endl;
 
     if (meta.modifyVendorString) {
+        vector<unsigned int> originVector(info.vendorString.begin(), info.vendorString.end());
         info.vendorString = meta.newVendorString;
-        std::vector<unsigned int> myVector(info.vendorString.begin(), info.vendorString.end());
+        vector<unsigned int> myVector(info.vendorString.begin(), info.vendorString.end());
         info.vendorStringOriginal = myVector;
+        meta.alterSize += (myVector.size() - originVector.size());
         cout << "Modifying vendor string info: " << meta.newVendorString << endl;
     }
     if (meta.modifyComment) {
@@ -129,21 +168,24 @@ void FlacMetadata::editFile(fileReader &in, fileWriter &out, MetaEditInfo meta) 
             throw runtime_error("Comment index out of range (Flac2wav::editFile)");
         }
         info.commentList[meta.modifyCommentIndex] = meta.newComment;
-        std::vector<unsigned int> myVector(meta.newComment.begin(), meta.newComment.end());
+        vector<unsigned int> myVector(meta.newComment.begin(), meta.newComment.end());
+        meta.alterSize += (myVector.size() - info.commentsOriginal[meta.modifyCommentIndex].size());
         info.commentsOriginal[meta.modifyCommentIndex] = myVector;
         cout << "Modifying comment info: " << meta.newComment << ", at: " << meta.modifyCommentIndex << endl;
     }
     if (meta.appendComment) {
         info.commentListLength++;
         info.commentList.push_back(meta.newComment);
-        std::vector<unsigned int> myVector(meta.newComment.begin(), meta.newComment.end());
+        vector<unsigned int> myVector(meta.newComment.begin(), meta.newComment.end());
         info.commentsOriginal.push_back(myVector);
+        meta.alterSize += myVector.size();
         cout << "Appending comment info: " << meta.newComment << endl;
     }
     if (meta.removeComment) {
         if (meta.removeCommentIndex >= info.commentListLength) {
             throw runtime_error("Comment index out of range (Flac2wav::editFile)");
         }
+        meta.alterSize -= info.commentsOriginal[meta.removeCommentIndex].size();
         info.commentList.erase(info.commentList.begin() + meta.removeCommentIndex);
         info.commentsOriginal.erase(info.commentsOriginal.begin() + meta.removeCommentIndex);
         info.commentListLength--;
@@ -152,41 +194,81 @@ void FlacMetadata::editFile(fileReader &in, fileWriter &out, MetaEditInfo meta) 
 
     //then, copy all the data from the input file to the output file
     out.writeBigInt(0x664c6143, 32);
-    if (info.vendorString.empty() && info.commentListLength == 0)
-        // if no comment term, and until now we may consider
-        // this as the last meta block
-        out.writeBigInt(1, 1);
-    else
-        out.writeBigInt(0, 1);
-    out.writeBigInt(0, 7);
-    out.writeBigInt((int) info.infoBlockSize, 24);
-    out.writeBigInt((int) info.minBlockSize, 16);
-    out.writeBigInt((int) info.maxBlockSize, 16);
-    out.writeBigInt((int) info.minFrameSize, 24);
-    out.writeBigInt((int) info.maxFrameSize, 24);
-    out.writeBigInt((int) info.sampleRate, 20);
-    out.writeBigInt((int) info.numChannels - 1, 3);
-    out.writeBigInt((int) info.sampleDepth - 1, 5);
-    out.writeBigInt((int) info.numSamples >> 18, 18);
-    out.writeBigInt((int) (info.numSamples & 0x3FFFF), 18);
-    for (int i = 0; i < 4; ++i) {
-        out.writeBigInt(fileReader::hexToInt(info.md5[i]), 32);
-    }
-
-    // comment block (currently as the last meta block)
-    out.writeBigInt(1, 1);
-    out.writeBigInt(4, 7);
-    out.writeBigInt((int) info.commentBlockSize, 24);
-    out.writeLittleInt((int) info.vendorString.length(), 32);
-    for (char i: info.vendorStringOriginal) {
-        out.writeLittleInt((int) i, 8);
-    }
-    out.writeLittleInt((int) info.commentListLength, 32);
-    for (int i = 0; i < info.commentListLength; ++i) {
-        out.writeLittleInt((int) info.commentList[i].length(), 32);
-        for (int j: info.commentsOriginal[i]) {
-            out.writeLittleInt(j, 8);
+    int lastAlterSize = 0;
+    for (int h = 0; h < info.headers.size(); h++) {
+        FlacMetadataHeader cur = info.headers[h];
+        out.writeBigInt(cur.isLast, 1);
+        out.writeBigInt(cur.blockType, 7);
+        switch (cur.blockType) {
+            case 0: // stream info block
+                cout << "Writing stream info block..." << endl;
+                out.writeBigInt(cur.blockSize, 24);
+                out.writeBigInt((int) info.minBlockSize, 16);
+                out.writeBigInt((int) info.maxBlockSize, 16);
+                out.writeBigInt((int) info.minFrameSize, 24);
+                out.writeBigInt((int) info.maxFrameSize, 24);
+                out.writeBigInt((int) info.sampleRate, 20);
+                out.writeBigInt((int) info.numChannels - 1, 3);
+                out.writeBigInt((int) info.sampleDepth - 1, 5);
+                out.writeBigInt((int) info.numSamples >> 18, 18);
+                out.writeBigInt((int) (info.numSamples & 0x3FFFF), 18);
+                for (const auto &i: info.md5) {
+                    out.writeBigInt(fileReader::hexToInt(i), 32);
+                }
+                lastAlterSize = 0;
+                break;
+            case 1: // padding block
+                cout << "Filling padding block..." << endl;
+                int blockSize;
+                if (lastAlterSize <= 0)
+                    blockSize = (int) cur.blockSize;
+                else
+                    blockSize = (int) cur.blockSize - lastAlterSize;
+                for (int i = 0; i < blockSize; ++i) {
+                    out.writeBigInt(0, 8);
+                }
+                break;
+            case 2: // application block
+                cout << "Writing application block..." << endl;
+                out.writeBigInt((int) info.applicationBlockSize, 24);
+                out.writeBigInt((int) info.applicationId, 32);
+                for (int i: info.applicationDataOriginal) {
+                    out.writeBigInt(i, 8);
+                }
+                lastAlterSize = 0;
+                break;
+            case 3: // seektable block
+                cout << "Writing seek table block..." << endl;
+                out.writeBigInt((int) (info.seekPointsCnt * (8 + 8 + 2)), 24);
+                for (int i = 0; i < info.seekPointsCnt; i++) {
+                    out.writeBigLongLong(info.seekPoints[i].sampleFirst, 64);
+                    out.writeBigLongLong(info.seekPoints[i].offset, 64);
+                    out.writeBigInt(info.seekPoints[i].sampleNum, 16);
+                }
+                lastAlterSize = 0;
+                break;
+            case 4: // comment block
+                cout << "Writing vorbis comment block..." << endl;
+                out.writeBigInt((int) info.commentBlockSize + meta.alterSize, 24);
+                // little-endian only appears in vorbis comment
+                out.writeLittleInt((int) info.vendorString.length(), 32);
+                for (char i: info.vendorStringOriginal) {
+                    out.writeLittleInt((int) i, 8);
+                }
+                out.writeLittleInt((int) info.commentListLength, 32);
+                for (int i = 0; i < info.commentListLength; ++i) {
+                    out.writeLittleInt((int) info.commentList[i].length(), 32);
+                    for (unsigned int j: info.commentsOriginal[i]) {
+                        out.writeLittleInt(j, 8);
+                    }
+                }
+                lastAlterSize = meta.alterSize;
+                break;
+            default: // other blocks
+                lastAlterSize = 0;
+                break;
         }
+
     }
 
     int temp;

@@ -52,10 +52,34 @@ unsigned int fileReader::readBigUInt(int n) {
         inputBufferLength += 8;
     }
     inputBufferLength -= n;
-    unsigned int result = (unsigned int) (inputBuffer >> inputBufferLength);
+    auto result = (unsigned int) (inputBuffer >> inputBufferLength);
     inputBuffer &= (1 << inputBufferLength) - 1;
     if (n < 32) {
         result &= (1 << n) - 1;
+    }
+    return result;
+}
+
+unsigned long long fileReader::readBigULongLong(int n) {
+    if (n > 64) {
+        throw std::runtime_error("n should be less than 64 (FileReader::readBigULongLong)");
+    }
+
+    while (inputBufferLength < n) {
+        unsigned int temp = input.get(); // Assuming input is your input stream
+        updateCRC8(temp);
+        updateCRC16(temp);
+        if (temp == EOF) {
+            throw std::runtime_error("Reached end of file");
+        }
+        inputBuffer = (inputBuffer << 8) | temp;
+        inputBufferLength += 8;
+    }
+    inputBufferLength -= n;
+    auto result = (unsigned long long) (inputBuffer >> inputBufferLength);
+    inputBuffer &= (1ULL << inputBufferLength) - 1;
+    if (n < 64) {
+        result &= (1ULL << n) - 1;
     }
     return result;
 }
@@ -74,6 +98,18 @@ void fileReader::closeReader() {
 }
 
 std::string fileReader::intToHex(int num) {
+    std::stringstream stream;
+    stream << std::hex << num;  // Convert decimal to hexadecimal
+    return stream.str();  // Return the hexadecimal string
+}
+
+std::string fileReader::intToHex(unsigned int num) {
+    std::stringstream stream;
+    stream << std::hex << num;  // Convert decimal to hexadecimal
+    return stream.str();  // Return the hexadecimal string
+}
+
+std::string fileReader::longLongToHex(unsigned long long num) {
     std::stringstream stream;
     stream << std::hex << num;  // Convert decimal to hexadecimal
     return stream.str();  // Return the hexadecimal string
@@ -146,6 +182,22 @@ void fileWriter::writeBigInt(unsigned int data, int n) {
         outputBufferLength -= 8;
         output.put((char) (outputBuffer >> outputBufferLength));
         outputBuffer &= (1 << outputBufferLength) - 1;
+    }
+}
+
+void fileWriter::writeBigLongLong(unsigned long long data, int n) {
+    if (n > 64) {
+        throw std::runtime_error("n should be less than 64 (FileWriter::writeBigULongLong)");
+    }
+
+    if (n > 32) {
+        unsigned int lowerPart = data & 0xFFFFFFFF; // Lower 32 bits
+        unsigned int upperPart = (data >> 32) & 0xFFFFFFFF; // Upper 32 bits
+
+        writeBigInt(upperPart, n - 32);
+        writeBigInt(lowerPart, 32);
+    } else {
+        writeBigInt((unsigned int) data, n);
     }
 }
 

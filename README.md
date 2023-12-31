@@ -19,7 +19,7 @@ Actually originated in the famous saying:
         - `p2w` for pcm to wav _(pending)_
         - `w2p` for wav to pcm _(pending)_
         - `w2a` for wav to aiff
-        - `a2w` for aiff to wav _(pending)_
+        - `a2w` for aiff to wav
         - `a2f` for aiff to flac _(pending)_
         - `f2a` for flac to aiff _(pending)_
         - `a2p` for aiff to pcm _(pending)_
@@ -45,7 +45,7 @@ Actually originated in the famous saying:
 ### Typical Usage
 
 ```bash
-gtwd -m fe -i "/Users/r/Downloads/flac-test-files/subset/15 - only verbatim subframes.flac" -o "/Users/r/Documents/gtwd/ProvidedDocuments/output.flac" -mv "In GuTao we trust" -ac "TITLE=GuTao tastes good, no need for salt"
+gtwd -m fe -i "/Users/r/Documents/gtwd/ProvidedDocuments/ovs.flac" -o "/Users/r/Documents/gtwd/ProvidedDocuments/output.flac" -mv "In GuTao we trust" -ac "TITLE=Trinity of GuTao: GuTao the Father, GuTaoZi and GuTao the Holy Spirit"
 
 gtwd -m fm -i "/Users/r/Documents/gtwd/ProvidedDocuments/output.flac"
 ```
