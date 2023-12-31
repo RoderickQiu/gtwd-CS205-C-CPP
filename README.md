@@ -14,22 +14,22 @@ Actually originated in the famous saying:
     - `-m` or `--mode`:
         - `w2f` for wav to flac
         - `f2w` for flac to wav
-        - `f2p` for flac to pcm _(pending)_
-        - `p2f` for pcm to flac _(pending)_
-        - `p2w` for pcm to wav _(pending)_
-        - `w2p` for wav to pcm _(pending)_
+        - `f2r` for flac to raw _(pending)_
+        - `r2f` for raw to flac _(pending)_
+        - `r2w` for raw to wav _(pending)_
+        - `w2r` for wav to raw _(pending)_
         - `w2a` for wav to aiff
         - `a2w` for aiff to wav
         - `a2f` for aiff to flac _(pending)_
         - `f2a` for flac to aiff _(pending)_
-        - `a2p` for aiff to pcm _(pending)_
-        - `p2a` for pcm to aiff _(pending)_
+        - `a2r` for aiff to raw _(pending)_
+        - `r2a` for raw to aiff _(pending)_
         - `fm` for flac meta data reading
         - `fe` for flac meta data editing
     - `-i` or `--input`: input file path
     - `-o` or `--output`: output file path
-- For `pcm` files (`p2w`, `p2f`)
-    - `-c` or `--config`: config ini file path for `pcm` files
+- For `raw` files (`r2w`, `r2f`)
+    - `-c` or `--config`: config ini file path for `raw` files
 - For `fe` mode (Flac meta data editing):
     - `-mv` or `--modify-vendor`: modify vendor
         - argument is the vendor string to modify

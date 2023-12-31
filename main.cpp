@@ -79,9 +79,9 @@ int main(int argc, char **argv) {
                 throw runtime_error(e.what());
             }
             remove(tmpname);
-        } else if (mode == "w2p") {// wav to pcm
+        } else if (mode == "w2r") {// wav to raw
             cout << Wav2pcm::hello() << endl;
-        } else if (mode == "p2w") {// pcm to wav
+        } else if (mode == "r2w") {// raw to wav
             cout << Pcm2wav::hello() << endl;
             PcmConfig pcmConfig;
             CSimpleIniA ini;
@@ -97,10 +97,10 @@ int main(int argc, char **argv) {
             cout << "CHANNEL: " << pcmConfig.channels << endl;
             cout << "DEPTH: " << pcmConfig.depth << endl;
             cout << "SAMPLE RATE: " << pcmConfig.sample_rate << endl;
-        } else if (mode == "f2p") {// flac to pcm
+        } else if (mode == "f2r") {// flac to raw
             cout << Flac2wav::hello() << endl;
             cout << Wav2pcm::hello() << endl;
-        } else if (mode == "p2f") {// pcm to flac
+        } else if (mode == "r2f") {// raw to flac
             cout << Pcm2wav::hello() << endl;
             cout << Wav2flac::hello() << endl;
         } else if (mode == "fm") {
@@ -180,14 +180,14 @@ string parseMode(const string &mode) {
         return "wav to flac";
     } else if (mode == "f2w") {
         return "flac to wav";
-    } else if (mode == "f2p") {
-        return "flac to pcm";
-    } else if (mode == "p2f") {
-        return "pcm to flac";
-    } else if (mode == "p2w") {
-        return "pcm to wav";
-    } else if (mode == "w2p") {
-        return "wav to pcm";
+    } else if (mode == "f2r") {
+        return "flac to raw";
+    } else if (mode == "r2f") {
+        return "raw to flac";
+    } else if (mode == "r2w") {
+        return "raw to wav";
+    } else if (mode == "w2r") {
+        return "wav to raw";
     } else if (mode == "fm") {
         return "flac metadata";
     } else if (mode == "fe") {
