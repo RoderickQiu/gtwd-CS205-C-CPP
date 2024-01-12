@@ -7,7 +7,7 @@
 #include<iostream>
 #include<string>
 
-class fileReader {
+class fileReader{
 private:
     std::ifstream &input;
     unsigned long long inputBuffer;
@@ -63,14 +63,20 @@ private:
     unsigned long long outputBuffer;
     int outputBufferLength;
 public:
+    unsigned int CRC8;
+    unsigned int CRC16;
     explicit fileWriter(std::ofstream &outStream) : output(outStream) {
         outputBuffer = 0;
         outputBufferLength = 0;
+        CRC8 = 0;
+        CRC16 = 0;
     }
 
     void writeLittleInt(unsigned int data, int n);
 
     void writeBigInt(unsigned int data, int n);
+
+    void writeInt(int val, int n);
 
     void writeBigLongLong(unsigned long long data, int n);
 
@@ -79,6 +85,8 @@ public:
     void closeWriter();
 
     void writeStr(std::string str);
+
+    void resetCRC();
 
     static std::string uint32ToString(unsigned int value);
 };

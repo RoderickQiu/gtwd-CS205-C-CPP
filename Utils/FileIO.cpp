@@ -180,7 +180,14 @@ void fileWriter::writeBigInt(unsigned int data, int n) {
     outputBufferLength += n;
     while (outputBufferLength >= 8) {
         outputBufferLength -= 8;
-        output.put((char) (outputBuffer >> outputBufferLength));
+        int temp = (unsigned char)(outputBuffer >> outputBufferLength);
+        output.put(temp);
+        CRC8 ^= temp;
+        CRC16 ^= temp << 8;
+        for(int i = 0; i < 8; i++){
+            CRC8 = (CRC8 << 1) ^ ((CRC8 >> 7) * 0x107);
+            CRC8 = (CRC8 << 1) ^ ((CRC8 >> 7) * 0x18005);
+        }
         outputBuffer &= (1 << outputBufferLength) - 1;
     }
 }
@@ -233,6 +240,11 @@ void fileWriter::closeWriter() {
     alignByte();
     output.flush();
     output.close();
+}
+
+void fileWriter::resetCRC() {
+    CRC8 = 0;
+    CRC16 = 0;
 }
 
 void fileCopier::copyFile() {
