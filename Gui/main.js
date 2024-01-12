@@ -40,7 +40,12 @@ app.whenReady().then(() => {
 
 ipcMain.on('exec', (event, arg) => {
     console.log('arg', arg);
-    let url = `./exec/${getOSString()}/gtwd -m ${arg.mode} -i "${arg.input}"`;
+    let url;
+    if (getOSString() === 'mac') {
+        url = `./exec/mac/gtwd -m ${arg.mode} -i "${arg.input}"`;
+    } else {
+        url = `.\\exec\\win\\gtwd -m ${arg.mode} -i "${arg.input}"`;
+    }
     if (arg.mode !== "fm") {
         url += ` -o "${arg.output}"`;
     }
