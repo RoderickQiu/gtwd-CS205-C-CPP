@@ -56,7 +56,7 @@ void encodeFrame(fileReader &in, fileWriter &out, unsigned int frameIndex, unsig
             out.writeBigInt(6, 3);
             break;
         default:
-            throw runtime_error("Illegal Argument");
+            throw runtime_error("Invalid Sample Depth");
     }
     out.writeBigInt(0, 1); // Reserved
     out.writeBigInt(0xFC | (frameIndex >> 30), 8); // "UTF-8" coded frame number
