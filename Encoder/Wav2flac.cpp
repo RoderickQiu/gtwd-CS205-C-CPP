@@ -12,7 +12,8 @@ void encodeSubframe(int samples[], unsigned long len, int sampleDepth, fileWrite
     out.writeBigInt(0, 1);
     out.writeBigInt(1, 6);
     out.writeBigInt(0, 1);
-    for (int i = 0; i < len; i++){
+    for (int i = 0; i < len; i++) {
+        // cout <<samples[i] << " " << sampleDepth << endl;
         out.writeBigInt(samples[i], sampleDepth);
     }
 }
@@ -26,13 +27,13 @@ void encodeFrame(fileReader &in, fileWriter &out, unsigned int frameIndex, unsig
         for (int ch = 0; ch < numChannels; ch++) {
             int val = 0;
             for (int j = 0; j < bytesPerSample; j++) {
-                int b = in.readLittleUInt(4);
+                int b = in.readLittleUInt(8);
                 if (b == -1) {
                     throw exception();
                 }
                 val |= b << (j * 8);
             }
-            if (samples[ch][i] == 8) {
+            if (sampleDepth == 8) {
                 samples[ch][i] = val - 128;
             } else {
                 samples[ch][i] = (val << (32 - sampleDepth)) >> (32 - sampleDepth);
@@ -40,27 +41,27 @@ void encodeFrame(fileReader &in, fileWriter &out, unsigned int frameIndex, unsig
         }
     }
     out.resetCRC();
-    out.writeBigInt(0x3FFE, 14 * 4); // Sync code '11111111111110'
-    out.writeBigInt(0, 1 * 4); // Reserved: mandatory value
-    out.writeBigInt(0, 1 * 4); // Blocking strategy: fixed-blocksize stream
-    out.writeBigInt(7, 4 * 4); // Block size in inter-channel samples: reserved
-    out.writeBigInt(sampleRate % 10 == 0 ? 14 : 13, 4 * 4); // Sample rate
-    out.writeBigInt(numChannels - 1, 4 * 4); // Channel assignment
+    out.writeBigInt(0x3FFE, 14); // Sync code '11111111111110'
+    out.writeBigInt(0, 1); // Reserved: mandatory value
+    out.writeBigInt(0, 1); // Blocking strategy: fixed-blocksize stream
+    out.writeBigInt(7, 4); // Block size in inter-channel samples: reserved
+    out.writeBigInt(sampleRate % 10 == 0 ? 14 : 13, 4); // Sample rate
+    out.writeBigInt(numChannels - 1, 4); // Channel assignment
     // 	Sample size in bits
     switch (sampleDepth) {
         case 16:
-            out.writeBigInt(4, 3 * 4);
+            out.writeBigInt(4, 3);
             break;
         case 24:
-            out.writeBigInt(6, 3 * 4);
+            out.writeBigInt(6, 3);
             break;
         default:
             throw runtime_error("Illegal Argument");
     }
-    out.writeBigInt(0, 1 * 4); // Reserved
-    out.writeBigInt(0xFC | (frameIndex >> 30), 8 * 4); // "UTF-8" coded frame number
+    out.writeBigInt(0, 1); // Reserved
+    out.writeBigInt(0xFC | (frameIndex >> 30), 8); // "UTF-8" coded frame number
     for (int i = 24; i >= 0; i -= 6) {
-        out.writeBigInt(0x80 | ((frameIndex >> i) & 0x3F), 16);
+        out.writeBigInt(0x80 | ((frameIndex >> i) & 0x3F), 8);
     }
     out.writeBigInt(blockSize - 1, 16);
     out.writeBigInt(sampleRate / (sampleRate % 10 == 0 ? 10 : 1), 16);
@@ -122,15 +123,15 @@ void Wav2flac::encodeFile(fileReader &in, fileWriter &out) {
         throw runtime_error("Invalid length of audio sample data");
     }
     int numSamples = sampleDataLen / (numChannels * (sampleDepth / 8));
+    cout << "Writing flac\n";
     // Encoding FLAC file
     // header
     out.writeBigInt(0x664c6143, 32); // "fLaC"
     // METADATA_BLOCK
     // METADATA_BLOCK_HEADER
-    out.writeBigInt(0, 1); // Last-metadata-block flag: not last
+    out.writeBigInt(1, 1); // Last-metadata-block flag: not last
     out.writeBigInt(0, 7); // BLOCK_TYPE: 0 - streaminfo
-    out.writeBigInt(144, 24);
-    // out.writeBigInt(272, 24);// Length (in bytes) of metadata to follow (not METADATA_BLOCK_HEADER)
+    out.writeBigInt(34, 24); // Length (in bytes) of metadata to follow (not METADATA_BLOCK_HEADER)
     //METADATA_BLOCK_STREAMINFO
     out.writeBigInt(BLOCK_SIZE, 16);// minimum block size: constant
     out.writeBigInt(BLOCK_SIZE, 16);// maximum block size: constant
@@ -139,8 +140,12 @@ void Wav2flac::encodeFile(fileReader &in, fileWriter &out) {
     out.writeBigInt(sampleRate, 20);// sample rate in Hz, max = 655350, 0 is invalid
     out.writeBigInt(numChannels - 1, 3); // (number of channels) - 1
     out.writeBigInt(sampleDepth - 1, 5); // (bits per sample) - 1
-    out.writeBigInt(numSamples, 36); // Total samples in stream
-    // out.writeBigInt(0, 128); // MD5 signature ?
+    out.writeBigInt(numSamples >> 18, 18); // Total samples in stream
+    out.writeBigInt(numSamples, 18);
+    // MD5 signature
+    for (int i = 0; i < 16; i++) {
+        out.writeBigInt(0, 8);
+    }
     // VORBIS_COMMENT
     // METADATA_BLOCK_HEADER
     out.writeBigInt(1, 1); // last

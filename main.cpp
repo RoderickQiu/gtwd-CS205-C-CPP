@@ -40,7 +40,10 @@ int main(int argc, char **argv) {
         if (mode == "f2w" || mode == "w2f" || mode == "w2a" || mode == "a2w") {
             char tmpname[FILENAME_MAX];
             char *tev = getenv("TMPDIR");
-            if (!tev) tev = getenv("TEMP");
+            if (!tev)
+                tev = getenv("TEMP");
+            if (!tev)
+                tev = ".\\ProvidedDocuments\\cache\\";
             strcpy(tmpname, tev);
 #ifdef WIN32
             strcat(tmpname, "\\");
@@ -53,15 +56,19 @@ int main(int argc, char **argv) {
             ifstream inputFile(input, ios::in | ios::binary);
             ofstream tempOutputFile(tmpname, ios::out | ios::trunc | ios::binary);
             try {
-                if (!inputFile.is_open()) { throw runtime_error("Error opening input file"); }
-                if (!tempOutputFile.is_open()) { throw runtime_error("Error opening temp output file"); }
+                if (!inputFile.is_open()) {
+                    throw runtime_error("Error opening input file");
+                }
+                if (!tempOutputFile.is_open()) {
+                    throw runtime_error("Error opening temp output file");
+                }
                 fileReader reader(inputFile);
                 fileWriter writer(tempOutputFile);
                 if (mode == "f2w")
                     Flac2wav::decodeFile(reader, writer);
-                else if (mode == "w2f")
+                else if (mode == "w2f") {
                     Wav2flac::encodeFile(reader, writer);
-                else if (mode == "w2a")
+                } else if (mode == "w2a")
                     Wav2aiff::encodeFile(reader, writer);
                 else if (mode == "a2w")
                     Aiff2wav::encodeFile(reader, writer);
@@ -69,8 +76,12 @@ int main(int argc, char **argv) {
                 writer.closeWriter();
                 ifstream tempInputFile(tmpname, ios::in | ios::binary);
                 ofstream outputFile(output, ios::out | ios::trunc | ios::binary);
-                if (!tempInputFile.is_open()) { throw runtime_error("Error opening temp input file"); }
-                if (!outputFile.is_open()) { throw runtime_error("Error opening output file"); }
+                if (!tempInputFile.is_open()) {
+                    throw runtime_error("Error opening temp input file");
+                }
+                if (!outputFile.is_open()) {
+                    throw runtime_error("Error opening output file");
+                }
                 fileCopier copier(tempInputFile, outputFile);
                 copier.copyFile();
                 copier.closeCopier();

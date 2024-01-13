@@ -76,8 +76,6 @@ public:
 
     void writeBigInt(unsigned int data, int n);
 
-    void writeInt(int val, int n);
-
     void writeBigLongLong(unsigned long long data, int n);
 
     void alignByte();
