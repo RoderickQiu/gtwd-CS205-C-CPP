@@ -19,17 +19,17 @@ string generateRandomString(int length);
 
 int main(int argc, char **argv) {
     string mode, input, output, config;
-    string modifyVendor, modifyComment, modifyCommentIndex, appendComment, removeCommentIndex;
-    auto cli = (
-            option("-m", "-M", "--mode") & value("mode", mode),
-                    option("-i", "-I", "--input") & value("input", input),
-                    option("-o", "-O", "--output") & value("output", output),
-                    option("-c", "-C", "--config") & value("config", config),
-                    option("-mv", "--modify-vendor") & value("modifyVendor", modifyVendor),
-                    option("-mc", "--modify-comment") & value("modifyComment", modifyComment)
-                    & value("commentIndex", modifyCommentIndex),
-                    option("-ac", "--append-comment") & value("appendComment", appendComment),
-                    option("-rc", "--remove-comment") & value("removeComment", removeCommentIndex)
+    string modifyVendor, modifyComment, modifyCommentIndex, appendComment, removeCommentIndex, tempFolder;
+    auto cli = (option("-m", "-M", "--mode") & value("mode", mode),
+            option("-i", "-I", "--input") & value("input", input),
+            option("-o", "-O", "--output") & value("output", output),
+            option("-c", "-C", "--config") & value("config", config),
+            option("-mv", "--modify-vendor") & value("modifyVendor", modifyVendor),
+            option("-mc", "--modify-comment") & value("modifyComment", modifyComment)
+            & value("commentIndex", modifyCommentIndex),
+            option("-ac", "--append-comment") & value("appendComment", appendComment),
+            option("-rc", "--remove-comment") & value("removeComment", removeCommentIndex),
+            option("-t", "-T", "--temp") & value("temp", tempFolder)
     );
     if (parse(argc, const_cast<char **>(argv), cli)) {
         cout << "Mode: " << parseMode(mode) << endl;
@@ -39,11 +39,21 @@ int main(int argc, char **argv) {
             cout << "Output: " << output << endl;
         if (mode == "f2w" || mode == "w2f" || mode == "w2a" || mode == "a2w") {
             char tmpname[FILENAME_MAX];
-            char *tev = getenv("TMPDIR");
-            if (!tev)
-                tev = getenv("TEMP");
-            if (!tev)
-                tev = ".\\ProvidedDocuments\\cache\\";
+            char *tev;
+            if (tempFolder.empty()) {
+                tev = getenv("TMPDIR");
+                if (!tev)
+                    tev = getenv("TEMP");
+                if (!tev)
+                    tev = getenv("TMP");
+            } else {
+                // declare own temp folder
+                tev = (char *) tempFolder.c_str();
+            }
+            if (!tev) {
+                throw runtime_error(
+                        "Error getting temp folder from environment variables, please manually declare using -t (main::main)");
+            }
             strcpy(tmpname, tev);
 #ifdef WIN32
             strcat(tmpname, "\\");
@@ -57,10 +67,10 @@ int main(int argc, char **argv) {
             ofstream tempOutputFile(tmpname, ios::out | ios::trunc | ios::binary);
             try {
                 if (!inputFile.is_open()) {
-                    throw runtime_error("Error opening input file");
+                    throw runtime_error("Error opening input file (main::main)");
                 }
                 if (!tempOutputFile.is_open()) {
-                    throw runtime_error("Error opening temp output file");
+                    throw runtime_error("Error opening temp output file (main::main)");
                 }
                 fileReader reader(inputFile);
                 fileWriter writer(tempOutputFile);
@@ -77,10 +87,10 @@ int main(int argc, char **argv) {
                 ifstream tempInputFile(tmpname, ios::in | ios::binary);
                 ofstream outputFile(output, ios::out | ios::trunc | ios::binary);
                 if (!tempInputFile.is_open()) {
-                    throw runtime_error("Error opening temp input file");
+                    throw runtime_error("Error opening temp input file (main::main)");
                 }
                 if (!outputFile.is_open()) {
-                    throw runtime_error("Error opening output file");
+                    throw runtime_error("Error opening output file (main::main)");
                 }
                 fileCopier copier(tempInputFile, outputFile);
                 copier.copyFile();

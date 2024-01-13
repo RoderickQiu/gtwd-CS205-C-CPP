@@ -6,7 +6,8 @@ By: [@RoderickQiu](https://github.com/RoderickQiu), [@CypherBruce](https://githu
 
 ## Description
 
-This project is a command line tool for converting audio files between different formats built using C++, supporting RAW, WAV, FLAC and AIFF.
+This project is a command line tool for converting audio files between different formats built using C++, supporting
+RAW, WAV, FLAC and AIFF.
 
 ### What we made
 
@@ -25,7 +26,8 @@ This project is a command line tool for converting audio files between different
     - **More Metadata Block Types**.
         - Parsing and editing support for `PADDING` block, and it will be shortened if the previous block enlarges.
         - Parsing support for `APPLICATION` and `SEEKTABLE` block.
-            - Here we didn't implement editing support for application and seek table blocks, because we think it is only meaningful to edit them when the project also works as a FLAC editor.
+            - Here we didn't implement editing support for application and seek table blocks, because we think it is
+              only meaningful to edit them when the project also works as a FLAC editor.
     - **Extreme Robustness**.
         - `MD5` signature and `CRC` check support.
         - Exception handling and memory management optimizations.
@@ -38,9 +40,11 @@ This project is a command line tool for converting audio files between different
 
 ### Contributions
 
-- [RoderickQiu](https://github.com/RoderickQiu) (A): Project structure, Flac metadata reading and editing, AIFF conversion, GUI.
+- [RoderickQiu](https://github.com/RoderickQiu) (A): Project structure, Flac metadata reading and editing, AIFF
+  conversion, GUI.
 - [SheepDoctor](https://github.com/SheepDoctor) (A): RAW conversion, WAV to FLAC conversion, File IO supporter lib.
-- [Cypher-Bruce](https://github.com/Cypher-Bruce) (A): FLAC to WAV conversion, CRC and MD5 signature support, File IO supporter lib.
+- [Cypher-Bruce](https://github.com/Cypher-Bruce) (A): FLAC to WAV conversion, CRC and MD5 signature support, File IO
+  supporter lib.
 
 ## Usage
 
@@ -73,6 +77,7 @@ Should work for both Windows, macOS and Linux.
         - `fe` for flac meta data editing
     - `-i` or `--input`: input file path
     - `-o` or `--output`: output file path
+    - `-t` or `--temp`: manually indicate a preferred temp directory
 - For `raw` files (`r2w`, `r2f`)
     - `-c` or `--config`: config ini file path for `raw` files
 - For `fe` mode (Flac meta data editing):
@@ -102,6 +107,14 @@ gtwd -m fe -i "/Users/r/Documents/gtwd/ProvidedDocuments/ovs.flac" -o "/Users/r/
 gtwd -m fm -i "/Users/r/Documents/gtwd/ProvidedDocuments/output.flac"
 ```
 
+If it is reported that "Error getting temp folder from environment variables" when executing `gtwd`, please manually
+add `-t` flag to the command line to indicate a preferred temp folder. It is because the default temp folder is not
+available in some environments.
+
+```bash
+gtwd -m f2w -i "/Users/r/Documents/gtwd/ProvidedDocuments/ovs.flac" -o "/Users/r/Documents/gtwd/ProvidedDocuments/output.wav" -t "/Users/r/Documents/gtwd/ProvidedDocuments/"
+```
+
 ### GUI Usage
 
 The GUI is built using `Electron`, so you need to install `Node.js` first, and run the following commands.
@@ -112,11 +125,14 @@ npm install
 npm run start
 ```
 
-The GUI is intuitive to use, and support all formats. View a screenshot of it at [here](https://chore-1259749012.cos.ap-hongkong.myqcloud.com/%E6%88%AA%E5%B1%8F2024-01-09%2023.07.31-9-23-12-21.png).
+The GUI is intuitive to use, and support all formats. View a screenshot of it
+at [here](https://chore-1259749012.cos.ap-hongkong.myqcloud.com/%E6%88%AA%E5%B1%8F2024-01-09%2023.07.31-9-23-12-21.png).
 
-If you are not using `Windows x86_64` or `macOS arm64`, you may need to alternate the executive of `gtwd` used, which is put under `Gui/exec` folder.
+If you are not using `Windows x86_64` or `macOS arm64`, you may need to alternate the executive of `gtwd` used, which is
+put under `Gui/exec` folder.
 
-If you cannot install `electron` due to the limit of your network, you can use the following commands to indicate an alternative source:
+If you cannot install `electron` due to the limit of your network, you can use the following commands to indicate an
+alternative source:
 
 ```bash
 npm config set registry https://registry.npm.taobao.org
@@ -140,7 +156,8 @@ In this project, we have used the following open source libraries:
 
 Also, in this project, we use `CLion` as our IDE, thanks to their free educational plan.
 
-**Thanks for Prof. Feng ZHENG for his C++ class. Thanks for the efforts of TAs of the class, especially Kangrui CHEN and Site FAN.**
+**Thanks for Prof. Feng ZHENG for his C++ class. Thanks for the efforts of TAs of the class, especially Kangrui CHEN and
+Site FAN.**
 
 ## Last but not least
 
