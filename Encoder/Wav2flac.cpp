@@ -13,7 +13,6 @@ void encodeSubframe(int samples[], unsigned long len, int sampleDepth, fileWrite
     out.writeBigInt(1, 6);
     out.writeBigInt(0, 1);
     for (int i = 0; i < len; i++) {
-        // cout <<samples[i] << " " << sampleDepth << endl;
         out.writeBigInt(samples[i], sampleDepth);
     }
 }
@@ -123,13 +122,14 @@ void Wav2flac::encodeFile(fileReader &in, fileWriter &out) {
         throw runtime_error("Invalid length of audio sample data");
     }
     int numSamples = sampleDataLen / (numChannels * (sampleDepth / 8));
+    cout << "-----------------\n";
     cout << "Writing flac\n";
     // Encoding FLAC file
     // header
     out.writeBigInt(0x664c6143, 32); // "fLaC"
     // METADATA_BLOCK
     // METADATA_BLOCK_HEADER
-    out.writeBigInt(1, 1); // Last-metadata-block flag: not last
+    out.writeBigInt(0, 1); // Last-metadata-block flag: not last
     out.writeBigInt(0, 7); // BLOCK_TYPE: 0 - streaminfo
     out.writeBigInt(34, 24); // Length (in bytes) of metadata to follow (not METADATA_BLOCK_HEADER)
     //METADATA_BLOCK_STREAMINFO
@@ -153,13 +153,16 @@ void Wav2flac::encodeFile(fileReader &in, fileWriter &out) {
     out.writeBigInt(0, 24); // block size
     // METADATA_BLOCK_VORBIS_COMMENT
     // https://www.xiph.org/vorbis/doc/v-comment.html
-    out.writeLittleInt(40, 32); // vendor length
-    out.writeStr("UTF-8"); // "UTF-8"
-    out.writeLittleInt(1, 32); // user comment list length
-    for (int i = 0; i < 1; i++) {
-        string str = "TITLE = test";
-        out.writeBigInt(8 * str.length(), 32);
-        out.writeStr(str);
+    string s = "Global Transcoder for WAV/FLAC/AIFF Data"; // vendor
+    out.writeLittleInt(s.length(), 32); // vendor length
+    out.writeStr(s);
+    vector<string> str;
+    str.emplace_back("TITLE=test");
+    str.push_back("ARTIST=GUTAO");
+    out.writeLittleInt(str.size(), 32); // user comment list length
+    for (int i = 0; i < str.size(); i++) {
+        out.writeLittleInt(str[i].length(), 32);
+        out.writeStr(str[i]);
     }
     // FRAME
     for (int i = 0; numSamples > 0; i++) {

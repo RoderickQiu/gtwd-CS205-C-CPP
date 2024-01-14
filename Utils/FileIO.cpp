@@ -226,7 +226,7 @@ std::string fileWriter::uint32ToString(unsigned int value) {
 
 void fileWriter::writeStr(std::string str) {
     for (int i = 0; i < str.length(); i++) {
-        fileWriter::writeBigInt((unsigned int) str[i], 8);
+        fileWriter::writeBigInt((unsigned char) str[i], 8);
     }
 }
 
