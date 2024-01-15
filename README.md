@@ -31,6 +31,7 @@ RAW, WAV, FLAC and AIFF.
     - **Extreme Robustness**.
         - `MD5` signature and `CRC` check support.
         - Exception handling and memory management optimizations.
+        - Passed `Google Sanitizer` check with no warnings.
     - **GUI**.
         - Support for all functions of this app.
         - Should support both Windows and macOS.
@@ -38,8 +39,8 @@ RAW, WAV, FLAC and AIFF.
     - **More Audio Formats**.
         - **Extra support for AIFF file format. Cool!**
     - **Anything You Regard as "Bonus"**.
-      - **Various playing speed!**
-        - slowing done or fasting the audio are supported!
+        - **Various playing speed!**
+            - slowing done or fasting the audio are supported!
 
 ### Contributions
 
@@ -81,8 +82,11 @@ Should work for both Windows, macOS and Linux.
     - `-i` or `--input`: input file path
     - `-o` or `--output`: output file path
     - `-t` or `--temp`: manually indicate a preferred temp directory
-- For `raw` files (`r2w`, `r2f`)
+- For `raw` input files (e.g. `r2w`, `r2f`):
     - `-c` or `--config`: config ini file path for `raw` files
+- For `w2f` mode only:
+    - `-v` or `--velocity`: play speed
+        - argument is the speed od the output file
 - For `fe` mode (Flac meta data editing):
     - `-mv` or `--modify-vendor`: modify vendor
         - argument is the vendor string to modify
@@ -95,9 +99,6 @@ Should work for both Windows, macOS and Linux.
         - if you have multiple comments, use a simple `;` without space to split
     - `-rc` or `--remove-comment`: remove comment
         - argument is the comment index to remove
-    - `-v` or `--velocity`: play speed
-      - argument is the speed od the output file
-      - argument can be used only in w2f mode
 
 ### Typical Usage
 
@@ -110,49 +111,20 @@ gtwd -m fe -i yourPathToInputFlac -o yourPathToOutputFlac -mv newVendor -ac yout
 # flac meta data reading
 gtwd -m fm -i yourPathToInputFlac
 
-# convert raw to wav
-# test: ovs.pcm
-gtwd -m r2w -i yourPathToInputFlac -o yourPathToOutputFlac
+# convert raw to wav (ovs.pcm)
+gtwd -m r2w -i yourPathToInputRaw -o yourPathToOutputWav -c yourPathToCorrespondingIni
 
-# convert wav to flac
-# test: ovs.wav
-gtwd -m w2f -i yourPathToInputFlac -o yourPathToOutputFlac -mv yourVendor -ac youtCommentToAppend
+# convert wav to flac (ovs.wav)
+gtwd -m w2f -i yourPathToInputWav -o yourPathToOutputFlac -mv yourVendor -ac youtCommentToAppend
 
-# convert raw to flac
-# test: ovs.pcm
-gtwd -m r2f -i yourPathToInputFlac -o yourPathToOutputFlac
+# convert flac to wav (ovs.flac)
+gtwd -m f2w -i yourPathToInputFlac -o yourPathToOutputWav
 
-# convert flac to wav
-# test: ovs.flac
-gtwd -m f2w -i yourPathToInputFlac -o yourPathToOutputFlac
+# convert flac to raw (ovs.flac)
+gtwd -m f2r -i yourPathToInputFlac -o yourPathToOutputRaw
 
-# convert flac to raw
-# test: ovs.flac
-gtwd -m f2r -i yourPathToInputFlac -o yourPathToOutputFlac
-
-# convert flac to aiff
-# test: ovs.flac
-gtwd -m f2a -i yourPathToInputFlac -o yourPathToOutputFlac
-
-# convert: aiff to flac
-# test: ove.aiff
-gtwd -m a2f -i yourPathToInputFlac -o yourPathToOutputFlac
-
-# convert: raw to aiff
-# test: ove.
-gtwd -m r2a -i yourPathToInputFlac -o yourPathToOutputFlac
-
-# convert: aiff to raw
-# test: ove.wav
-gtwd -m a2r -i yourPathToInputFlac -o yourPathToOutputFlac
-
-# convert: wav to aiff
-# test: ove.wav
-gtwd -m w2a -i yourPathToInputFlac -o yourPathToOutputFlac
-
-# convert: aiff to wav
-# test: ove.wav
-gtwd -m a2w -i yourPathToInputFlac -o yourPathToOutputFlac
+# convert: aiff to flac (ovs.aiff)
+gtwd -m a2f -i yourPathToInputAiff -o yourPathToOutputFlac
 ```
 
 If it is reported that "Error getting temp folder from environment variables" when executing `gtwd`, please manually
@@ -162,6 +134,25 @@ available in some environments.
 ```bash
 gtwd -m f2w -i "/Users/r/Documents/gtwd/ProvidedDocuments/ovs.flac" -o "/Users/r/Documents/gtwd/ProvidedDocuments/output.wav" -t "/Users/r/Documents/gtwd/ProvidedDocuments/"
 ```
+
+### Provided Examples
+
+- RAW -> WAV -> FLAC
+    - `ProvidedDocuments/raw/ovs.pcm` with `ProvidedDocuments/raw/ovs.ini`
+    - `ProvidedDocuments/wav/ovs.wav`
+- FLAC -> WAV -> RAW
+    - `ProvidedDocuments/flac/ovs.flac`
+    - `ProvidedDocuments/wav/ovs.wav`
+- More Metadata
+    - `ProvidedDocuments/metadata/application.flac` for `APPLICATION`, `ProvidedDocuments/raw/seektable.flac`
+      for `SEEKTABLE`
+      and `ProvidedDocuments/raw/padding.flac` for `PADDING` blocks.
+- AIFF
+    - `ProvidedDocuments/aiff/mint16.aif`, `ProvidedDocuments/aiff/mint24.aif` and `ProvidedDocuments/aiff/mint32.aif`,
+      each with different bit depth
+    - `ProvidedDocuments/aiff/ovs.aiff`
+- Different Velocity
+    - `ProvidedDocuments/wav/ovs.wav`
 
 ### GUI Usage
 
