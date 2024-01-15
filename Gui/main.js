@@ -55,6 +55,27 @@ ipcMain.on('exec', (event, arg) => {
             url += ` "${arg.second}"`;
         }
     }
+    if (arg.flacMeta !== undefined) {
+        if (arg.flacMeta !== "") {
+            url += ` -ac "${arg.flacMeta}"`
+        }
+    }
+    if (arg.tmpFolder !== undefined) {
+        if (arg.tmpFolder !== "") {
+            url += ` -t "${arg.tmpFolder}"`
+        }
+    }
+    if (arg.rawConfig !== undefined) {
+        console.log('rawConfig', arg.rawConfig)
+        if (arg.rawConfig !== "") {
+            url += ` -c "${arg.rawConfig}"`
+        }
+    }
+    if (arg.wavVelo !== undefined) {
+        if (arg.wavVelo !== "") {
+            url += ` -v "${arg.wavVelo}"`
+        }
+    }
     console.log('url', url);
     cmd.run(
         url,
