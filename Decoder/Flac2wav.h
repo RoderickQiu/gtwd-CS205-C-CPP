@@ -21,7 +21,6 @@ class Flac2wav {
             return "Hello from fLaC2Wav";
         }
         static void decodeFile(fileReader& in, fileWriter& out);
-
 };
 
 
