@@ -86,7 +86,7 @@ Should work for both Windows, macOS and Linux.
     - `-c` or `--config`: config ini file path for `raw` files
 - For `w2f` mode only:
     - `-v` or `--velocity`: play speed
-        - argument is the speed od the output file
+        - argument is the speed of the output file
         - a float number between 0 and 1
 - For `fe` mode (Flac meta data editing):
     - `-mv` or `--modify-vendor`: modify vendor
@@ -182,7 +182,7 @@ npm config set disturl https://npm.taobao.org/dist
 npm config set electron_mirror https://npm.taobao.org/mirrors/electron/
 ```
 
-## Acknoledgement
+## Acknowledgement
 
 In this project, we have used the following open source libraries:
 
