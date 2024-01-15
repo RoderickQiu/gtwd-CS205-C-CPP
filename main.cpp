@@ -43,14 +43,22 @@ int main(int argc, char **argv) {
             option("-ac", "--append-comment") & value("appendComment", appendComment),
             option("-rc", "--remove-comment") & value("removeComment", removeCommentIndex),
             option("-t", "-T", "--temp") & value("temp", tempFolder),
-            option("-v", "-V", "--velocity") & value("velocity", v)
+            option("-v", "-V", "--velocity") & value("velocity", v),
+            option("-h", "-H", "--help")([&mode] {
+                cout << "Hi there, this is GTWD.\n"
+                        "Please see https://github.com/RoderickQiu/gtwd-CS205-C-CPP for guidance.";
+                mode = "help";
+            })
     );
     if (parse(argc, const_cast<char **>(argv), cli)) {
+        if (mode == "help") return 0;
         cout << "Mode: " << parseMode(mode) << endl;
         if (!input.empty())
             cout << "Input: " << input << endl;
+        else throw runtime_error("No input file, abort (main::main)");
         if (!output.empty())
             cout << "Output: " << output << endl;
+        else if (mode != "fm") throw runtime_error("No output directory, abort (main::main)");
         if (mode == "f2w" || mode == "w2f" || mode == "w2a" || mode == "a2w" || mode == "r2w" ||
             mode == "w2r") {// 1-step
             PcmConfig pcmConfig;
@@ -365,5 +373,5 @@ string parseMode(const string &mode) {
     } else if (mode == "fe") {
         return "flac metadata edit";
     }
-    return "invalid mode";
+    throw runtime_error("Invalid mode, please see -h (main::parseMode)");
 }

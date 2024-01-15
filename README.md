@@ -64,6 +64,7 @@ Should work for both Windows, macOS and Linux.
 ### Arguments
 
 - For all modes:
+    - `-h` or `--help`: print help message
     - `-m` or `--mode`:
         - `w2f` for wav to flac
         - `f2w` for flac to wav
