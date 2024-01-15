@@ -10,15 +10,16 @@
 #include<unordered_map>
 #include "../Utils/Utils.h"
 #include "FlacMetadata.h"
+#include "MD5.h"
 
 using namespace std;
 
 class Wav2flac {
 private:
     static void encodeSubframe(int samples[], unsigned long len, int sampleDepth, fileWriter &out);
-    static void encodeFrame(fileReader &in, fileWriter &out, unsigned int frameIndex, unsigned int numChannels,
+    static MD5& encodeFrame(fileReader &in, fileWriter &out, unsigned int frameIndex, unsigned int numChannels,
                                            unsigned int sampleDepth, unsigned int sampleRate,
-                                           int blockSize);
+                                           int blockSize, MD5& md5);
 public:
     static string hello() {
         return "Hello from Wav2fLaC";

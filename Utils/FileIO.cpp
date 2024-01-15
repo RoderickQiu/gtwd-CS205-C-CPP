@@ -263,3 +263,7 @@ void fileCopier::closeCopier() {
     input.close();
     output.close();
 }
+
+std::ofstream & fileWriter::get() {
+    return output;
+}

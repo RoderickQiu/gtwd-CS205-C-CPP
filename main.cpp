@@ -103,6 +103,7 @@ int main(int argc, char **argv) {
                 else if (mode == "w2f") {
                     FlacMetadata::MetaEditInfo metaEditInfo = getMetadataInfo(modifyVendor, modifyComment,
                                                                               modifyCommentIndex,
+
                                                                               appendComment, removeCommentIndex);
                     Wav2flac::encodeFile(reader, writer, metaEditInfo);
                 } else if (mode == "w2a")
@@ -130,6 +131,7 @@ int main(int argc, char **argv) {
             }
             remove(tmpname);
         } else if (mode == "w2r") {// wav to raw
+
             cout << Wav2pcm::hello() << endl;
         } else if (mode == "f2r") {// flac to raw
             cout << Flac2wav::hello() << endl;

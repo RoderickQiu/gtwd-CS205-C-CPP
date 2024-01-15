@@ -134,3 +134,14 @@ unsigned int MD5::toInt(const unsigned int data) {
     return ((data & 0xff) << 24) | ((data & 0xff00) << 8) | ((data & 0xff0000) >> 8) | ((data & 0xff000000) >> 24);
 }
 
+void MD5::getMD5(unsigned int (&data)[4]) {
+    if(!finalized){
+        throw std::runtime_error("MD5 not finalized (MD5::getMD5)");
+    }
+
+    for (int i = 0; i < 4; ++i) {
+        data[i] = MD5_result[i];
+    }
+}
+
+

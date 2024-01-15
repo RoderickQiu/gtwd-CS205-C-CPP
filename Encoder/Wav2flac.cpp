@@ -5,6 +5,7 @@
 #include "Wav2flac.h"
 #include "FlacMetadata.h"
 #include<fstream>
+#include "MD5.h"
 
 static const int BLOCK_SIZE = 4096;
 
@@ -17,16 +18,17 @@ void Wav2flac::encodeSubframe(int samples[], unsigned long len, int sampleDepth,
     }
 }
 
-void Wav2flac::encodeFrame(fileReader &in, fileWriter &out, unsigned int frameIndex, unsigned int numChannels,
-                 unsigned int sampleDepth, unsigned int sampleRate,
-                 int blockSize) {
+MD5& Wav2flac::encodeFrame(fileReader &in, fileWriter &out, unsigned int frameIndex, unsigned int numChannels,
+                                unsigned int sampleDepth, unsigned int sampleRate,
+                                int blockSize, MD5& md5) {
     int samples[numChannels][blockSize];
     unsigned int bytesPerSample = sampleDepth / 8;
     for (int i = 0; i < blockSize; i++) {
         for (int ch = 0; ch < numChannels; ch++) {
             int val = 0;
             for (int j = 0; j < bytesPerSample; j++) {
-                int b = in.readLittleUInt(8);
+                unsigned int b = in.readLittleUInt(8);
+                md5.updateMD5(b);
                 if (b == -1) {
                     throw exception();
                 }
@@ -70,6 +72,7 @@ void Wav2flac::encodeFrame(fileReader &in, fileWriter &out, unsigned int frameIn
     }
     out.alignByte();
     out.writeBigInt(out.CRC16, 16);
+    return md5;
 }
 
 void Wav2flac::encodeFile(fileReader &in, fileWriter &out, FlacMetadata::MetaEditInfo metaEditInfo) {
@@ -143,6 +146,7 @@ void Wav2flac::encodeFile(fileReader &in, fileWriter &out, FlacMetadata::MetaEdi
     out.writeBigInt(numSamples >> 18, 18); // Total samples in stream
     out.writeBigInt(numSamples, 18);
     // MD5 signature
+    streampos md5Index = out.get().tellp();
     for (int i = 0; i < 16; i++) {
         out.writeBigInt(0, 8);
     }
@@ -150,27 +154,44 @@ void Wav2flac::encodeFile(fileReader &in, fileWriter &out, FlacMetadata::MetaEdi
     // METADATA_BLOCK_HEADER
     out.writeBigInt(1, 1); // last
     out.writeBigInt(4, 7); // vorbis comment block
+    streampos sizeIndex = out.get().tellp();
     out.writeBigInt(0, 24); // block size
     // METADATA_BLOCK_VORBIS_COMMENT
     // https://www.xiph.org/vorbis/doc/v-comment.html
+    long long size = 0;
     string s = metaEditInfo.newVendorString; // vendor
-    if(s.empty()){
+    if (s.empty()) {
         s = "Global Transcoder for WAV/FLAC/AIFF Data";
     }
     out.writeLittleInt(s.length(), 32); // vendor length
     out.writeStr(s);
     vector<string> str = metaEditInfo.newComments;
     out.writeLittleInt(str.size(), 32); // user comment list length
+    size += s.length() + 8;
     for (int i = 0; i < str.size(); i++) {
         out.writeLittleInt(str[i].length(), 32);
         out.writeStr(str[i]);
+        size += str[i].length() + 4;
     }
+    out.get().seekp(sizeIndex, ios::beg);
+    out.writeBigInt(size, 24);
+    out.get().seekp(0, ios::end);
+
     // FRAME
+    MD5 md5;
     for (int i = 0; numSamples > 0; i++) {
         unsigned int blockSize = min(numSamples, BLOCK_SIZE);
-        encodeFrame(in, out, i, numChannels, sampleDepth, sampleRate, blockSize);
+        md5 = encodeFrame(in, out, i, numChannels, sampleDepth, sampleRate, blockSize, md5);
         numSamples -= blockSize;
     }
+    md5.finalizeMD5();
+    unsigned int md5int[4];
+    md5.getMD5(md5int);
+    out.get().seekp(md5Index, ios::beg);
+    for(int i = 0; i < 4; i++){
+        out.writeBigInt(md5int[i], 32);
+    }
+    out.get().seekp(0, ios::end);
 }
 
 

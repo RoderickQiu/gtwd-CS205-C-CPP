@@ -86,6 +86,8 @@ public:
 
     void resetCRC();
 
+    std::ofstream & get();
+
     static std::string uint32ToString(unsigned int value);
 };
 
