@@ -38,6 +38,7 @@ void Pcm2wav::outputWAVFile(fileReader &in, fileWriter &out, PcmConfig config) {
     out.writeLittleInt(sampleDepth, 16); // bits per sample
     out.writeBigInt(0x64617461, 32); // "data"
     out.writeLittleInt((int) sampleDataLength, 32); // data chunk size
+    cout << "Pcm2wav::outputWAVFile: header writing finished" << endl;
 
     int temp;
     while (true) {
@@ -51,4 +52,6 @@ void Pcm2wav::outputWAVFile(fileReader &in, fileWriter &out, PcmConfig config) {
             break;
         }
     }
+
+    cout << "Pcm2wav::outputWAVFile: all finished" << endl;
 }
