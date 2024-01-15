@@ -25,7 +25,7 @@ public:
         return "Hello from Wav2fLaC";
     }
 
-    static void encodeFile(fileReader &in, fileWriter &out, FlacMetadata::MetaEditInfo metaEditInfo, int v);
+    static void encodeFile(fileReader &in, fileWriter &out, FlacMetadata::MetaEditInfo metaEditInfo, double v);
 };
 
 #endif //GTWD_WAV2FLAC_H

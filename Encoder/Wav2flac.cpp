@@ -75,7 +75,7 @@ MD5 &Wav2flac::encodeFrame(fileReader &in, fileWriter &out, unsigned int frameIn
     return md5;
 }
 
-void Wav2flac::encodeFile(fileReader &in, fileWriter &out, FlacMetadata::MetaEditInfo metaEditInfo, int v) {
+void Wav2flac::encodeFile(fileReader &in, fileWriter &out, FlacMetadata::MetaEditInfo metaEditInfo, double v) {
     cout << "Wav2flac::encodeFile: called" << endl;
     if (in.readBigUInt(32) != 0x52494646) {
         throw runtime_error("Invalid RIFF file header (Wav2flac::encodeFile)");
