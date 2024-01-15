@@ -76,7 +76,6 @@ MD5 &Wav2flac::encodeFrame(fileReader &in, fileWriter &out, unsigned int frameIn
 }
 
 void Wav2flac::encodeFile(fileReader &in, fileWriter &out, FlacMetadata::MetaEditInfo metaEditInfo, double v) {
-    cout << "Wav2flac::encodeFile: called" << endl;
     if (in.readBigUInt(32) != 0x52494646) {
         throw runtime_error("Invalid RIFF file header (Wav2flac::encodeFile)");
     }
@@ -106,11 +105,13 @@ void Wav2flac::encodeFile(fileReader &in, fileWriter &out, FlacMetadata::MetaEdi
     if (numChannels <= 0 || numChannels > 8) {
         throw runtime_error("Invalid WAV file channel count (Wav2flac::encodeFile)");
     }
+    cout << "numChannels: " << numChannels << endl;
     sampleRate = in.readLittleUInt(32);
     if (sampleRate <= 0 || sampleRate >= (1 << 20)) {
         throw runtime_error("Invalid WAV file sample rate (Wav2flac::encodeFile)");
     }
     sampleRate /= v;
+    cout << "sampleRate: " << sampleRate << endl;
     bps = in.readLittleUInt(32);
     bps = bps >> 4;
     blockAlign = in.readLittleUInt(16);
@@ -118,6 +119,7 @@ void Wav2flac::encodeFile(fileReader &in, fileWriter &out, FlacMetadata::MetaEdi
     if (sampleDepth == 0 || sampleDepth > 32 || sampleDepth % 8 != 0) {
         throw runtime_error("Unsupported WAV file sample depth");
     }
+    cout << "sampleDepth: " << sampleDepth << endl;
     if (in.readBigUInt(32) != 0x64617461) {
         throw runtime_error("Invalid WAV file data chunk header 'data' (Wav2flac::encodeFile)");
     }
@@ -125,7 +127,9 @@ void Wav2flac::encodeFile(fileReader &in, fileWriter &out, FlacMetadata::MetaEdi
     if (sampleDataLen <= 0 || sampleDataLen % (numChannels * (sampleDepth / 8)) != 0) {
         throw runtime_error("Invalid length of audio sample data");
     }
+    cout << "sampleDataLen: " << sampleDataLen << endl;
     int numSamples = sampleDataLen / (numChannels * (sampleDepth / 8));
+    cout << "numSamples: " << numSamples << endl;
     cout << "-----------------\n";
     cout << "Writing flac\n";
     // Encoding FLAC file
