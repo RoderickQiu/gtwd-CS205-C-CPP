@@ -32,6 +32,7 @@ getMetadataInfo(const string &modifyVendor, const string &modifyComment, const s
 int main(int argc, char **argv) {
     string mode, input, output, config;
     string modifyVendor, modifyComment, modifyCommentIndex, appendComment, removeCommentIndex, tempFolder;
+    double v = 1;
     auto cli = (option("-m", "-M", "--mode") & value("mode", mode),
             option("-i", "-I", "--input") & value("input", input),
             option("-o", "-O", "--output") & value("output", output),
@@ -41,7 +42,8 @@ int main(int argc, char **argv) {
             & value("commentIndex", modifyCommentIndex),
             option("-ac", "--append-comment") & value("appendComment", appendComment),
             option("-rc", "--remove-comment") & value("removeComment", removeCommentIndex),
-            option("-t", "-T", "--temp") & value("temp", tempFolder)
+            option("-t", "-T", "--temp") & value("temp", tempFolder),
+            option("-v", "-V", "--velocity") & value("velocity", v)
     );
     if (parse(argc, const_cast<char **>(argv), cli)) {
         cout << "Mode: " << parseMode(mode) << endl;
@@ -73,7 +75,7 @@ int main(int argc, char **argv) {
                     FlacMetadata::MetaEditInfo metaEditInfo = getMetadataInfo(modifyVendor, modifyComment,
                                                                               modifyCommentIndex,
                                                                               appendComment, removeCommentIndex);
-                    Wav2flac::encodeFile(reader, writer, metaEditInfo);
+                    Wav2flac::encodeFile(reader, writer, metaEditInfo, 1 / v);
                 } else if (mode == "w2a")
                     Wav2aiff::encodeFile(reader, writer);
                 else if (mode == "a2w")
@@ -154,7 +156,7 @@ int main(int argc, char **argv) {
                     FlacMetadata::MetaEditInfo metaEditInfo = getMetadataInfo(modifyVendor, modifyComment,
                                                                               modifyCommentIndex, appendComment,
                                                                               removeCommentIndex);
-                    Wav2flac::encodeFile(reader, writer, metaEditInfo);
+                    Wav2flac::encodeFile(reader, writer, metaEditInfo, v);
                 } else if (mode == "r2a" || mode == "f2a") {
                     Wav2aiff::encodeFile(reader, writer);
                 } else if (mode == "a2r" || mode == "f2r") {

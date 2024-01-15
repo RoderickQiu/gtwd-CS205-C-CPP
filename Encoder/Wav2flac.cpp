@@ -18,9 +18,9 @@ void Wav2flac::encodeSubframe(int samples[], unsigned long len, int sampleDepth,
     }
 }
 
-MD5& Wav2flac::encodeFrame(fileReader &in, fileWriter &out, unsigned int frameIndex, unsigned int numChannels,
-                                unsigned int sampleDepth, unsigned int sampleRate,
-                                int blockSize, MD5& md5) {
+MD5 &Wav2flac::encodeFrame(fileReader &in, fileWriter &out, unsigned int frameIndex, unsigned int numChannels,
+                           unsigned int sampleDepth, unsigned int sampleRate,
+                           int blockSize, MD5 &md5) {
     int samples[numChannels][blockSize];
     unsigned int bytesPerSample = sampleDepth / 8;
     for (int i = 0; i < blockSize; i++) {
@@ -75,7 +75,7 @@ MD5& Wav2flac::encodeFrame(fileReader &in, fileWriter &out, unsigned int frameIn
     return md5;
 }
 
-void Wav2flac::encodeFile(fileReader &in, fileWriter &out, FlacMetadata::MetaEditInfo metaEditInfo) {
+void Wav2flac::encodeFile(fileReader &in, fileWriter &out, FlacMetadata::MetaEditInfo metaEditInfo, int v) {
     cout << "Wav2flac::encodeFile: called" << endl;
     if (in.readBigUInt(32) != 0x52494646) {
         throw runtime_error("Invalid RIFF file header (Wav2flac::encodeFile)");
@@ -110,6 +110,7 @@ void Wav2flac::encodeFile(fileReader &in, fileWriter &out, FlacMetadata::MetaEdi
     if (sampleRate <= 0 || sampleRate >= (1 << 20)) {
         throw runtime_error("Invalid WAV file sample rate (Wav2flac::encodeFile)");
     }
+    sampleRate /= v;
     bps = in.readLittleUInt(32);
     bps = bps >> 4;
     blockAlign = in.readLittleUInt(16);
@@ -188,7 +189,7 @@ void Wav2flac::encodeFile(fileReader &in, fileWriter &out, FlacMetadata::MetaEdi
     unsigned int md5int[4];
     md5.getMD5(md5int);
     out.get().seekp(md5Index, ios::beg);
-    for(int i = 0; i < 4; i++){
+    for (int i = 0; i < 4; i++) {
         out.writeBigInt(md5int[i], 32);
     }
     out.get().seekp(0, ios::end);
