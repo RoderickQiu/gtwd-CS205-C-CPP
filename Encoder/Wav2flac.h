@@ -25,7 +25,6 @@ public:
     }
 
     static void encodeFile(fileReader &in, fileWriter &out, FlacMetadata::MetaEditInfo metaEditInfo);
-
 };
 
 #endif //GTWD_WAV2FLAC_H

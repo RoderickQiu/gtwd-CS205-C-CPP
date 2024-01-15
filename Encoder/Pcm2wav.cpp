@@ -3,6 +3,7 @@
 //
 
 #include "Pcm2wav.h"
+#include <cstring>
 
 void Pcm2wav::outputWAVFile(fileReader &in, fileWriter &out, PcmConfig config) {
     if (config.sample_rate <= 0 || config.sample_rate >= (1 << 20)) {

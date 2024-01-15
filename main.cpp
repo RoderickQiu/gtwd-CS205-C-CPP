@@ -43,7 +43,7 @@ int main(int argc, char **argv) {
             cout << "Input: " << input << endl;
         if (!output.empty())
             cout << "Output: " << output << endl;
-        if (mode == "f2w" || mode == "w2f" || mode == "w2a" || mode == "a2w" || mode == "r2w") {
+        if (mode == "f2w" || mode == "w2f" || mode == "w2a" || mode == "a2w" || mode == "r2w" || mode == "w2r") {
             PcmConfig pcmConfig;
             if (mode == "r2w") {//if we need to read config file (raw)
                 CSimpleIniA ini;
@@ -111,6 +111,17 @@ int main(int argc, char **argv) {
                     Aiff2wav::encodeFile(reader, writer);
                 else if (mode == "r2w")
                     Pcm2wav::outputWAVFile(reader, writer, pcmConfig);
+                else if (mode == "w2r"){
+                    Wav2pcm::decodeFile(reader, writer, pcmConfig);
+                    CSimpleIniA ini;
+                    ini.SetUnicode();
+                    ini.SetLongValue("STREAM INFO", "sample_rate", pcmConfig.sample_rate);
+                    ini.SetLongValue("STREAM INFO", "depth", pcmConfig.depth);
+                    ini.SetLongValue("STREAM INFO", "channels", pcmConfig.channels);
+                    ini.SetLongValue("STREAM INFO", "num_samples", pcmConfig.num_samples);
+                    ini.SaveFile((output.substr(0, output.length()-4) + ".ini").c_str());
+                }
+
                 reader.closeReader();
                 writer.closeWriter();
                 ifstream tempInputFile(tmpname, ios::in | ios::binary);
@@ -129,13 +140,6 @@ int main(int argc, char **argv) {
                 throw runtime_error(e.what());
             }
             remove(tmpname);
-        } else if (mode == "w2r") {// wav to raw
-            cout << Wav2pcm::hello() << endl;
-        } else if (mode == "f2r") {// flac to raw
-            cout << Flac2wav::hello() << endl;
-            cout << Wav2pcm::hello() << endl;
-        } else if (mode == "r2f") {// raw to flac
-            cout << Wav2flac::hello() << endl;
         } else if (mode == "fm") {
             ifstream inputFile(input, ios::in | ios::binary);
             if (inputFile.is_open()) {
