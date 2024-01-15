@@ -18,7 +18,7 @@ void Wav2flac::encodeSubframe(int samples[], unsigned long len, int sampleDepth,
     }
 }
 
-MD5 &Wav2flac::encodeFrame(fileReader &in, fileWriter &out, unsigned int frameIndex, unsigned int numChannels,
+void Wav2flac::encodeFrame(fileReader &in, fileWriter &out, unsigned int frameIndex, unsigned int numChannels,
                            unsigned int sampleDepth, unsigned int sampleRate,
                            int blockSize, MD5 &md5) {
     int samples[numChannels][blockSize];
@@ -72,7 +72,6 @@ MD5 &Wav2flac::encodeFrame(fileReader &in, fileWriter &out, unsigned int frameIn
     }
     out.alignByte();
     out.writeBigInt(out.CRC16, 16);
-    return md5;
 }
 
 void Wav2flac::encodeFile(fileReader &in, fileWriter &out, FlacMetadata::MetaEditInfo metaEditInfo, double v) {
@@ -186,7 +185,7 @@ void Wav2flac::encodeFile(fileReader &in, fileWriter &out, FlacMetadata::MetaEdi
     MD5 md5;
     for (int i = 0; numSamples > 0; i++) {
         unsigned int blockSize = min(numSamples, BLOCK_SIZE);
-        md5 = encodeFrame(in, out, i, numChannels, sampleDepth, sampleRate, blockSize, md5);
+        encodeFrame(in, out, i, numChannels, sampleDepth, sampleRate, blockSize, md5);
         numSamples -= blockSize;
     }
     md5.finalizeMD5();

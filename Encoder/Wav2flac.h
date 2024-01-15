@@ -17,7 +17,7 @@ using namespace std;
 class Wav2flac {
 private:
     static void encodeSubframe(int samples[], unsigned long len, int sampleDepth, fileWriter &out);
-    static MD5& encodeFrame(fileReader &in, fileWriter &out, unsigned int frameIndex, unsigned int numChannels,
+    static void encodeFrame(fileReader &in, fileWriter &out, unsigned int frameIndex, unsigned int numChannels,
                                            unsigned int sampleDepth, unsigned int sampleRate,
                                            int blockSize, MD5& md5);
 public:
