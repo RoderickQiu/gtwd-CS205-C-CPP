@@ -21,6 +21,7 @@ void Flac2wav::decodeFile(fileReader &in, fileWriter &out) {
     unsigned long long numSamples = -1;
     unsigned int MD5Code[4];
     bool isLastBlock = false;
+    bool isFirstBlock = true;
     while(!isLastBlock) {
         isLastBlock = in.readBigUInt(1);
         unsigned int blockType = in.readBigUInt(7);
@@ -52,11 +53,15 @@ void Flac2wav::decodeFile(fileReader &in, fileWriter &out) {
             }
             cout<<endl;
         } else {
+            if(isFirstBlock) {
+                throw std::runtime_error("First block is not streamInfo (Flac2wav::decodeFile)");
+            }
             // discard metadata
             for (int i = 0; i < blockSize; ++i) {
                 in.readBigUInt(8);
             }
         }
+        isFirstBlock = false;
     }
     if(sampleRate == 0){
         throw std::runtime_error("sampleRate should not be 0 (Flac2wav::decodeFile)");
@@ -82,8 +87,17 @@ void Flac2wav::decodeFile(fileReader &in, fileWriter &out) {
     out.writeLittleInt((int)sampleDataLength, 32); // data chunk size
 
     MD5 md5;
+    fileInfo info{};
+    info.minimumBlockSize = minBlockSize;
+    info.maximumBlockSize = maxBlockSize;
+    info.minimumFrameSize = minFrameSize;
+    info.maximumFrameSize = maxFrameSize;
+    info.numberOfChannels = numChannels;
+    info.sampleRate = sampleRate;
+    info.bitsPerSample = sampleDepth;
 
-    while(decodeFrames(in, out, numChannels, sampleDepth, md5));
+    int blockSizeExceptionCount = 0;
+    while(decodeFrames(in, out, numChannels, sampleDepth, md5, info, blockSizeExceptionCount));
 
     md5.finalizeMD5();
     if(!md5.checkMD5(MD5Code)) {
@@ -91,7 +105,7 @@ void Flac2wav::decodeFile(fileReader &in, fileWriter &out) {
     }
 }
 
-bool Flac2wav::decodeFrames(fileReader &in, fileWriter &out, unsigned int numChannels, unsigned int sampleDepth, MD5 &md5) {
+bool Flac2wav::decodeFrames(fileReader &in, fileWriter &out, unsigned int numChannels, unsigned int sampleDepth, MD5 &md5, fileInfo info, int &exceptionCount) {
     in.resetCRC8();
     in.resetCRC16();
 
@@ -103,6 +117,10 @@ bool Flac2wav::decodeFrames(fileReader &in, fileWriter &out, unsigned int numCha
             throw e;
         }
         return false;
+    }
+
+    if(exceptionCount){
+        throw std::runtime_error("Invalid fixed blockSize (Flac2wav::decodeFrame)");
     }
 
     if(syncCode != 0x3FFE) {
@@ -132,6 +150,7 @@ bool Flac2wav::decodeFrames(fileReader &in, fileWriter &out, unsigned int numCha
         in.readBigUInt(8);
     }
 
+    // blocking strategy
     unsigned int blockSize = 0;
     if(blockSizeCode == 1) {
         blockSize = 192;
@@ -147,17 +166,92 @@ bool Flac2wav::decodeFrames(fileReader &in, fileWriter &out, unsigned int numCha
         throw std::runtime_error("Reserved blockSizeCode (Flac2wav::decodeFrame)");
     }
 
-    // sample rate -- ignore
-    if(sampleRateCode == 12){
-        in.readBigUInt(8);
-    }else if(sampleRateCode == 13 || sampleRateCode == 14){
-        in.readBigUInt(16);
+    // sample rate
+    unsigned int frameSampleRate = 0;
+    if(sampleRateCode == 0){
+        frameSampleRate = info.sampleRate;
+    }else if(sampleRateCode == 1){
+        frameSampleRate = 88200;
+    }else if(sampleRateCode == 2){
+        frameSampleRate = 176400;
+    }else if(sampleRateCode == 3){
+        frameSampleRate = 192000;
+    }else if(sampleRateCode == 4){
+        frameSampleRate = 8000;
+    }else if(sampleRateCode == 5){
+        frameSampleRate = 16000;
+    }else if(sampleRateCode == 6){
+        frameSampleRate = 22050;
+    }else if(sampleRateCode == 7){
+        frameSampleRate = 24000;
+    }else if(sampleRateCode == 8){
+        frameSampleRate = 32000;
+    }else if(sampleRateCode == 9){
+        frameSampleRate = 44100;
+    }else if(sampleRateCode == 10){
+        frameSampleRate = 48000;
+    }else if(sampleRateCode == 11){
+        frameSampleRate = 96000;
+    }else if(sampleRateCode == 12){
+        frameSampleRate = in.readBigUInt(8) * 1000;
+    }else if(sampleRateCode == 13){
+        frameSampleRate = in.readBigUInt(16);
+    }else if(sampleRateCode == 14){
+        frameSampleRate = in.readBigUInt(16) * 10;
+    }else if(sampleRateCode == 15){
+        throw std::runtime_error("Invalid sampleRateCode (Flac2wav::decodeFrame)");
+    }
+
+    unsigned int frameSampleDepth = 0;
+    if(sampleDepthCode == 0){
+        frameSampleDepth = info.bitsPerSample;
+    }else if(sampleDepthCode == 1){
+        frameSampleDepth = 8;
+    }else if(sampleDepthCode == 2){
+        frameSampleDepth = 12;
+    }else if(sampleDepthCode == 3){
+        throw std::runtime_error("Invalid sampleDepthCode (Flac2wav::decodeFrame)");
+    }else if(sampleDepthCode == 4){
+        frameSampleDepth = 16;
+    }else if(sampleDepthCode == 5){
+        frameSampleDepth = 20;
+    }else if(sampleDepthCode == 6){
+        frameSampleDepth = 24;
+    }else if(sampleDepthCode == 7){
+        frameSampleDepth = 32;
     }
 
     in.readBigUInt(8); // CRC8
     if(!in.checkCRC8()) {
         throw std::runtime_error("CRC8 check failed (Flac2wav::decodeFrame)");
     }
+
+    // robustness check
+    if(blockingStrategy == 0) {
+        // fixed block size
+        if(blockSize != info.minimumBlockSize) {
+            exceptionCount++;
+        }
+    } else {
+        // variable block size
+        if(blockSize < info.minimumBlockSize || blockSize > info.maximumBlockSize) {
+            throw std::runtime_error("Invalid variable blockSize (Flac2wav::decodeFrame)");
+        }
+    }
+    if(frameSampleRate != info.sampleRate) {
+        throw std::runtime_error("Invalid frameSampleRate (Flac2wav::decodeFrame)");
+    }
+    if(channelAssignmentCode >= 11) {
+        throw std::runtime_error("Reserved channelAssignmentCode (Flac2wav::decodeFrame)");
+    }else if(channelAssignmentCode >= 8 && info.numberOfChannels != 2) {
+        throw std::runtime_error("Invalid channelAssignmentCode (Flac2wav::decodeFrame)");
+    }else if(channelAssignmentCode < 8 && info.numberOfChannels != channelAssignmentCode + 1) {
+        throw std::runtime_error("Invalid channelAssignmentCode (Flac2wav::decodeFrame)");
+    }
+    if(frameSampleDepth != info.bitsPerSample) {
+        throw std::runtime_error("Invalid frameSampleDepth (Flac2wav::decodeFrame)");
+    }
+
 
     unsigned int* samples[numChannels];
     for (int i = 0; i < numChannels; ++i) {

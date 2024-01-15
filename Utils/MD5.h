@@ -34,6 +34,8 @@ public:
 
     void printMD5();
 
+    void getMD5(unsigned int (&data)[4]);
+
     bool checkMD5(const unsigned int data[]);
 };
 

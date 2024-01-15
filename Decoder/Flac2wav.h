@@ -11,9 +11,19 @@
 #include"MD5.h"
 using namespace std;
 
+struct fileInfo{
+    unsigned int minimumBlockSize;
+    unsigned int maximumBlockSize;
+    unsigned int minimumFrameSize;
+    unsigned int maximumFrameSize;
+    unsigned int numberOfChannels;
+    unsigned int sampleRate;
+    unsigned int bitsPerSample;
+};
+
 class Flac2wav {
     private:
-        static bool decodeFrames(fileReader& in, fileWriter& out, unsigned int numChannels, unsigned int sampleDepth, MD5& md5);
+        static bool decodeFrames(fileReader& in, fileWriter& out, unsigned int numChannels, unsigned int sampleDepth, MD5& md5, fileInfo info, int& exceptionCount);
         static void decodeSubFrames(fileReader& in, unsigned int sampleDepth, unsigned int channelAssignment, unsigned int numChannels, unsigned int blockSize, unsigned int* samples[]);
         static void decodeSubFrame(fileReader& in, unsigned int sampleDepth, unsigned int blockSize, long long result[]);
     public:
