@@ -17,6 +17,12 @@ string parseMode(const string &mode);
 
 string generateRandomString(int length);
 
+vector<string> strSplit(const string &text, char sep);
+
+FlacMetadata::MetaEditInfo
+getMetadataInfo(const string &modifyVendor, const string &modifyComment, const string &modifyCommentIndex,
+                const string &appendComment, const string &removeCommentIndex);
+
 int main(int argc, char **argv) {
     string mode, input, output, config;
     string modifyVendor, modifyComment, modifyCommentIndex, appendComment, removeCommentIndex, tempFolder;
@@ -143,32 +149,8 @@ int main(int argc, char **argv) {
                 throw runtime_error("Error opening output file (main::main)");
             }
 
-            FlacMetadata::MetaEditInfo metaEditInfo;
-            if (!modifyVendor.empty()) {
-                metaEditInfo.newVendorString = modifyVendor;
-                metaEditInfo.modifyVendorString = true;
-            }
-            if (!modifyComment.empty()) {
-                metaEditInfo.newComment = modifyComment;
-                metaEditInfo.modifyComment = true;
-                if (!modifyCommentIndex.empty()) {
-                    metaEditInfo.modifyCommentIndex = stoi(modifyCommentIndex);
-                } else {
-                    throw runtime_error("Error acquiring comment index for modifying (main::main)");
-                }
-            }
-            if (!appendComment.empty()) {
-                metaEditInfo.newComment = appendComment;
-                metaEditInfo.appendComment = true;
-            }
-            if (!removeCommentIndex.empty()) {
-                metaEditInfo.removeComment = true;
-                if (!removeCommentIndex.empty()) {
-                    metaEditInfo.removeCommentIndex = stoi(removeCommentIndex);
-                } else {
-                    throw runtime_error("Error acquiring comment index for removing (main::main)");
-                }
-            }
+            FlacMetadata::MetaEditInfo metaEditInfo = getMetadataInfo(modifyVendor, modifyComment, modifyCommentIndex,
+                                                                      appendComment, removeCommentIndex);
 
             fileReader reader(inputFile);
             fileWriter writer(outputFile);
@@ -184,6 +166,50 @@ int main(int argc, char **argv) {
         }
     }
     return 0;
+}
+
+FlacMetadata::MetaEditInfo
+getMetadataInfo(const string &modifyVendor, const string &modifyComment, const string &modifyCommentIndex,
+                const string &appendComment, const string &removeCommentIndex) {
+    FlacMetadata::MetaEditInfo metaEditInfo;
+    if (!modifyVendor.empty()) {
+        metaEditInfo.newVendorString = modifyVendor;
+        metaEditInfo.modifyVendorString = true;
+    }
+    if (!modifyComment.empty()) {
+        metaEditInfo.modifiedComment = modifyComment;
+        metaEditInfo.modifyComment = true;
+        if (!modifyCommentIndex.empty()) {
+            metaEditInfo.modifyCommentIndex = stoi(modifyCommentIndex);
+        } else {
+            throw runtime_error("Error acquiring comment index for modifying (main::main)");
+        }
+    }
+    if (!appendComment.empty()) {
+        metaEditInfo.newComments = strSplit(appendComment, ';');
+        metaEditInfo.appendComment = true;
+    }
+    if (!removeCommentIndex.empty()) {
+        metaEditInfo.removeComment = true;
+        if (!removeCommentIndex.empty()) {
+            metaEditInfo.removeCommentIndex = stoi(removeCommentIndex);
+        } else {
+            throw runtime_error("Error acquiring comment index for removing (main::main)");
+        }
+    }
+    return metaEditInfo;
+}
+
+vector<string> strSplit(const string &text, char sep) {
+    vector<string> tokens;
+    string token;
+    istringstream tokenStream(text);
+
+    while (getline(tokenStream, token, sep)) {
+        tokens.push_back(token);
+    }
+
+    return tokens;
 }
 
 string generateRandomString(int length) {

@@ -63,7 +63,8 @@ public:
         string newVendorString;
         bool modifyComment = false;
         int modifyCommentIndex = -1;
-        string newComment;
+        string modifiedComment;
+        vector<string> newComments;
         bool appendComment = false;
         bool removeComment = false;
         int removeCommentIndex = -1;

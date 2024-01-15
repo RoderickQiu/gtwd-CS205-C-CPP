@@ -167,19 +167,21 @@ void FlacMetadata::editFile(fileReader &in, fileWriter &out, MetaEditInfo meta) 
         if (meta.modifyCommentIndex >= info.commentListLength) {
             throw runtime_error("Comment index out of range (Flac2wav::editFile)");
         }
-        info.commentList[meta.modifyCommentIndex] = meta.newComment;
-        vector<unsigned int> myVector(meta.newComment.begin(), meta.newComment.end());
+        info.commentList[meta.modifyCommentIndex] = meta.modifiedComment;
+        vector<unsigned int> myVector(meta.modifiedComment.begin(), meta.modifiedComment.end());
         meta.alterSize += (myVector.size() - info.commentsOriginal[meta.modifyCommentIndex].size());
         info.commentsOriginal[meta.modifyCommentIndex] = myVector;
-        cout << "Modifying comment info: " << meta.newComment << ", at: " << meta.modifyCommentIndex << endl;
+        cout << "Modifying comment info: " << meta.modifiedComment << ", at: " << meta.modifyCommentIndex << endl;
     }
     if (meta.appendComment) {
         info.commentListLength++;
-        info.commentList.push_back(meta.newComment);
-        vector<unsigned int> myVector(meta.newComment.begin(), meta.newComment.end());
-        info.commentsOriginal.push_back(myVector);
-        meta.alterSize += myVector.size();
-        cout << "Appending comment info: " << meta.newComment << endl;
+        for (int i = 0; i < meta.newComments.size(); i++) {
+            info.commentList.push_back(meta.newComments[i]);
+            vector<unsigned int> myVector(meta.newComments[i].begin(), meta.newComments[i].end());
+            info.commentsOriginal.push_back(myVector);
+            meta.alterSize += myVector.size();
+            cout << "Appending comment info: " << meta.newComments[i] << endl;
+        }
     }
     if (meta.removeComment) {
         if (meta.removeCommentIndex >= info.commentListLength) {
