@@ -40,7 +40,7 @@ RAW, WAV, FLAC and AIFF.
         - **Extra support for AIFF file format. Cool!**
     - **Anything You Regard as "Bonus"**.
         - **Various playing speed!**
-            - slowing done or fasting the audio are supported!
+            - Slowing done or fasting the audio are supported!
 
 ### Contributions
 
@@ -87,6 +87,7 @@ Should work for both Windows, macOS and Linux.
 - For `w2f` mode only:
     - `-v` or `--velocity`: play speed
         - argument is the speed od the output file
+        - a float number between 0 and 1
 - For `fe` mode (Flac meta data editing):
     - `-mv` or `--modify-vendor`: modify vendor
         - argument is the vendor string to modify
@@ -106,7 +107,7 @@ We suggest that testers use absolute paths for the input and output files.
 
 ```bash
 # flac meta data editing
-gtwd -m fe -i yourPathToInputFlac -o yourPathToOutputFlac -mv newVendor -ac youtCommentToAppend
+gtwd -m fe -i yourPathToInputFlac -o yourPathToOutputFlac -mv newVendor -ac yourCommentToAppend
 
 # flac meta data reading
 gtwd -m fm -i yourPathToInputFlac
@@ -115,7 +116,7 @@ gtwd -m fm -i yourPathToInputFlac
 gtwd -m r2w -i yourPathToInputRaw -o yourPathToOutputWav -c yourPathToCorrespondingIni
 
 # convert wav to flac (ovs.wav)
-gtwd -m w2f -i yourPathToInputWav -o yourPathToOutputFlac -mv yourVendor -ac youtCommentToAppend
+gtwd -m w2f -i yourPathToInputWav -o yourPathToOutputFlac -mv yourVendor -ac yourCommentToAppend
 
 # convert flac to wav (ovs.flac)
 gtwd -m f2w -i yourPathToInputFlac -o yourPathToOutputWav
@@ -132,7 +133,7 @@ add `-t` flag to the command line to indicate a preferred temp folder. It is bec
 available in some environments.
 
 ```bash
-gtwd -m f2w -i "/Users/r/Documents/gtwd/ProvidedDocuments/ovs.flac" -o "/Users/r/Documents/gtwd/ProvidedDocuments/output.wav" -t "/Users/r/Documents/gtwd/ProvidedDocuments/"
+gtwd -m f2w -i yourPathToInputFlac -o yourPathToOutputWav -t yourTempPath
 ```
 
 ### Provided Examples
@@ -146,7 +147,7 @@ gtwd -m f2w -i "/Users/r/Documents/gtwd/ProvidedDocuments/ovs.flac" -o "/Users/r
 - More Metadata
     - `ProvidedDocuments/metadata/application.flac` for `APPLICATION`, `ProvidedDocuments/raw/seektable.flac`
       for `SEEKTABLE`
-      and `ProvidedDocuments/raw/padding.flac` for `PADDING` blocks.
+      and `ProvidedDocuments/raw/padding.flac` for `PADDING` blocks
 - AIFF
     - `ProvidedDocuments/aiff/mint16.aif`, `ProvidedDocuments/aiff/mint24.aif` and `ProvidedDocuments/aiff/mint32.aif`,
       each with different bit depth
