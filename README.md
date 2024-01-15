@@ -37,6 +37,9 @@ RAW, WAV, FLAC and AIFF.
         - With an elegant and intuitive interface.
     - **More Audio Formats**.
         - **Extra support for AIFF file format. Cool!**
+    - **Anything You Regard as "Bonus"**.
+      - **Various playing speed!**
+        - slowing done or fasting the audio are supported!
 
 ### Contributions
 
@@ -92,20 +95,64 @@ Should work for both Windows, macOS and Linux.
         - if you have multiple comments, use a simple `;` without space to split
     - `-rc` or `--remove-comment`: remove comment
         - argument is the comment index to remove
+    - `-v` or `--velocity`: play speed
+      - argument is the speed od the output file
+      - argument can be used only in w2f mode
 
 ### Typical Usage
 
-We suggest that testers use abosulte paths for the input and output files.
+We suggest that testers use absolute paths for the input and output files.
 
 ```bash
-# convert, flac to wav as an example
-gtwd -m f2w -i "/Users/r/Documents/gtwd/ProvidedDocuments/ovs.flac" -o "/Users/r/Documents/gtwd/ProvidedDocuments/output.wav"
-
 # flac meta data editing
-gtwd -m fe -i "/Users/r/Documents/gtwd/ProvidedDocuments/ovs.flac" -o "/Users/r/Documents/gtwd/ProvidedDocuments/output.flac" -mv "In GuTao we trust" -ac "TITLE=Trinity of GuTao: GuTao the Father, GuTaoZi and GuTao the Holy Spirit;ARTIST=GuTaoZi"
+gtwd -m fe -i yourPathToInputFlac -o yourPathToOutputFlac -mv newVendor -ac youtCommentToAppend
 
 # flac meta data reading
-gtwd -m fm -i "/Users/r/Documents/gtwd/ProvidedDocuments/output.flac"
+gtwd -m fm -i yourPathToInputFlac
+
+# convert raw to wav
+# test: ovs.pcm
+gtwd -m r2w -i yourPathToInputFlac -o yourPathToOutputFlac
+
+# convert wav to flac
+# test: ovs.wav
+gtwd -m w2f -i yourPathToInputFlac -o yourPathToOutputFlac -mv yourVendor -ac youtCommentToAppend
+
+# convert raw to flac
+# test: ovs.pcm
+gtwd -m r2f -i yourPathToInputFlac -o yourPathToOutputFlac
+
+# convert flac to wav
+# test: ovs.flac
+gtwd -m f2w -i yourPathToInputFlac -o yourPathToOutputFlac
+
+# convert flac to raw
+# test: ovs.flac
+gtwd -m f2r -i yourPathToInputFlac -o yourPathToOutputFlac
+
+# convert flac to aiff
+# test: ovs.flac
+gtwd -m f2a -i yourPathToInputFlac -o yourPathToOutputFlac
+
+# convert: aiff to flac
+# test: ove.aiff
+gtwd -m a2f -i yourPathToInputFlac -o yourPathToOutputFlac
+
+# convert: raw to aiff
+# test: ove.
+gtwd -m r2a -i yourPathToInputFlac -o yourPathToOutputFlac
+
+# convert: aiff to raw
+# test: ove.wav
+gtwd -m a2r -i yourPathToInputFlac -o yourPathToOutputFlac
+
+# convert: wav to aiff
+# test: ove.wav
+gtwd -m w2a -i yourPathToInputFlac -o yourPathToOutputFlac
+
+# convert: aiff to wav
+# test: ove.wav
+gtwd -m a2w -i yourPathToInputFlac -o yourPathToOutputFlac
 ```
 
 If it is reported that "Error getting temp folder from environment variables" when executing `gtwd`, please manually

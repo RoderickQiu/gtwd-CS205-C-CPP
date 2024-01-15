@@ -67,8 +67,11 @@ void Wav2pcm::decodeFile(fileReader &in, fileWriter &out, PcmConfig &config) {
         throw runtime_error("Invalid length of audio sample data");
     }
     config.num_samples = sampleDataLen / (numChannels * (sampleDepth / 8));
+    cout << "Wav2pcm::decodeFile: header all parsed" << endl;
 
     for (int i = 0; i < sampleDataLen; i++) {
         out.writeLittleInt(in.readLittleUInt(8), 8);
     }
+
+    cout << "Wav2pcm::decodeFile: all finished" << endl;
 }
