@@ -346,14 +346,22 @@ string parseMode(const string &mode) {
         return "raw to wav";
     } else if (mode == "w2r") {
         return "wav to raw";
-    } else if (mode == "fm") {
-        return "flac metadata";
-    } else if (mode == "fe") {
-        return "flac metadata edit";
     } else if (mode == "a2w") {
         return "aiff to wav";
     } else if (mode == "w2a") {
         return "wav to aiff";
+    } else if (mode == "f2a") {
+        return "flac to aiff";
+    } else if (mode == "a2f") {
+        return "aiff to flac";
+    } else if (mode == "a2r") {
+        return "aiff to raw";
+    } else if (mode == "r2a") {
+        return "raw to aiff";
+    } else if (mode == "fm") {
+        return "flac metadata";
+    } else if (mode == "fe") {
+        return "flac metadata edit";
     }
     return "invalid mode";
 }
