@@ -14,6 +14,11 @@
 using namespace std;
 
 class Wav2flac {
+private:
+    static void encodeSubframe(int samples[], unsigned long len, int sampleDepth, fileWriter &out);
+    static void encodeFrame(fileReader &in, fileWriter &out, unsigned int frameIndex, unsigned int numChannels,
+                                           unsigned int sampleDepth, unsigned int sampleRate,
+                                           int blockSize);
 public:
     static string hello() {
         return "Hello from Wav2fLaC";

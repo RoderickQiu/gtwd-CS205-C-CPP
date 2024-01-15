@@ -8,7 +8,7 @@
 
 static const int BLOCK_SIZE = 4096;
 
-void encodeSubframe(int samples[], unsigned long len, int sampleDepth, fileWriter &out) {
+void Wav2flac::encodeSubframe(int samples[], unsigned long len, int sampleDepth, fileWriter &out) {
     out.writeBigInt(0, 1);
     out.writeBigInt(1, 6);
     out.writeBigInt(0, 1);
@@ -17,7 +17,7 @@ void encodeSubframe(int samples[], unsigned long len, int sampleDepth, fileWrite
     }
 }
 
-void encodeFrame(fileReader &in, fileWriter &out, unsigned int frameIndex, unsigned int numChannels,
+void Wav2flac::encodeFrame(fileReader &in, fileWriter &out, unsigned int frameIndex, unsigned int numChannels,
                  unsigned int sampleDepth, unsigned int sampleRate,
                  int blockSize) {
     int samples[numChannels][blockSize];
