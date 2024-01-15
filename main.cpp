@@ -296,9 +296,9 @@ char *generateTempFile(char *tmpname, const string &tempFolder) {
     strcat(tmpname, "XXXXXXX");
 #endif
     int fd = mkstemp(tmpname);
-    if (fd < 0) {
-        throw runtime_error("Error creating temp file (main::main)");
-    }
+//    if (fd < 0) {
+//        throw runtime_error("Error creating temp file (main::main)");
+//    }
     cout << "Temp file: " << tmpname << endl;
     return tmpname;
 }
