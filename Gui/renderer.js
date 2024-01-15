@@ -1,5 +1,7 @@
 const {ipcRenderer} = require('electron');
 
+const splitter = process.platform === 'win32' ? '\\' : '/';
+
 // flac meta
 document.getElementById("flac-meta-submit").addEventListener("click", function () {
     let inFile = document.getElementById("flac-meta-input").files[0];
@@ -35,12 +37,12 @@ document.getElementById("flac-meta-edit-submit").addEventListener("click", funct
     if (mode === "")
         alert("Please select a mode first!");
     let inFile = document.getElementById("flac-meta-edit-input").files[0].path.toString();
-    const fileName = inFile.substring(inFile.lastIndexOf('/') + 1);
+    const fileName = inFile.substring(inFile.lastIndexOf(splitter) + 1);
     let outDir = document.getElementById("flac-meta-edit-output").value;
     if (outDir === "")
-        outDir = inFile.substring(0, inFile.lastIndexOf('/'));
-    if (outDir[outDir.length - 1] !== '/')
-        outDir += '/';
+        outDir = inFile.substring(0, inFile.lastIndexOf(splitter));
+    if (outDir[outDir.length - 1] !== splitter)
+        outDir += splitter;
     outDir += "output_" + fileName.toString();
     ipcRenderer.send('exec', {
         mode: 'fe',
@@ -88,13 +90,13 @@ document.getElementById("conv-input").addEventListener("change", function (e) {
 });
 document.getElementById("conv-submit").addEventListener("click", function (e) {
     let inFile = document.getElementById("conv-input").files[0].path.toString();
-    const fileName = inFile.substring(inFile.lastIndexOf('/') + 1);
+    const fileName = inFile.substring(inFile.lastIndexOf(splitter) + 1);
     const inType = fileName.substring(fileName.lastIndexOf('.') + 1);
     let outDir = document.getElementById("conv-output").value;
     if (outDir === "")
-        outDir = inFile.substring(0, inFile.lastIndexOf('/'));
-    if (outDir[outDir.length - 1] !== '/')
-        outDir += '/';
+        outDir = inFile.substring(0, inFile.lastIndexOf(splitter));
+    if (outDir[outDir.length - 1] !== splitter)
+        outDir += splitter;
     outDir += "output_" + fileName.toString().replace(inType, into);
     if (inType === into) {
         alert("Please select a different type!");
