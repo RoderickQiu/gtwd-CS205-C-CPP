@@ -9,6 +9,7 @@
 #include<fstream>
 #include<unordered_map>
 #include "../Utils/Utils.h"
+#include "FlacMetadata.h"
 
 using namespace std;
 
@@ -18,7 +19,7 @@ public:
         return "Hello from Wav2fLaC";
     }
 
-    static void encodeFile(fileReader &in, fileWriter &out);
+    static void encodeFile(fileReader &in, fileWriter &out, FlacMetadata::MetaEditInfo metaEditInfo);
 
 };
 

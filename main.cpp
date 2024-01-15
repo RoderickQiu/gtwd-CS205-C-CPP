@@ -83,7 +83,10 @@ int main(int argc, char **argv) {
                 if (mode == "f2w")
                     Flac2wav::decodeFile(reader, writer);
                 else if (mode == "w2f") {
-                    Wav2flac::encodeFile(reader, writer);
+                    FlacMetadata::MetaEditInfo metaEditInfo = getMetadataInfo(modifyVendor, modifyComment,
+                                                                              modifyCommentIndex,
+                                                                              appendComment, removeCommentIndex);
+                    Wav2flac::encodeFile(reader, writer, metaEditInfo);
                 } else if (mode == "w2a")
                     Wav2aiff::encodeFile(reader, writer);
                 else if (mode == "a2w")

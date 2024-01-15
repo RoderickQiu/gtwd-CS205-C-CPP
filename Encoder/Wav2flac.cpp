@@ -72,7 +72,7 @@ void encodeFrame(fileReader &in, fileWriter &out, unsigned int frameIndex, unsig
     out.writeBigInt(out.CRC16, 16);
 }
 
-void Wav2flac::encodeFile(fileReader &in, fileWriter &out) {
+void Wav2flac::encodeFile(fileReader &in, fileWriter &out, FlacMetadata::MetaEditInfo metaEditInfo) {
     cout << "Wav2flac::encodeFile: called" << endl;
     if (in.readBigUInt(32) != 0x52494646) {
         throw runtime_error("Invalid RIFF file header (Wav2flac::encodeFile)");
@@ -153,12 +153,13 @@ void Wav2flac::encodeFile(fileReader &in, fileWriter &out) {
     out.writeBigInt(0, 24); // block size
     // METADATA_BLOCK_VORBIS_COMMENT
     // https://www.xiph.org/vorbis/doc/v-comment.html
-    string s = "Global Transcoder for WAV/FLAC/AIFF Data"; // vendor
+    string s = metaEditInfo.newVendorString; // vendor
+    if(s.empty()){
+        s = "Global Transcoder for WAV/FLAC/AIFF Data";
+    }
     out.writeLittleInt(s.length(), 32); // vendor length
     out.writeStr(s);
-    vector<string> str;
-    str.emplace_back("TITLE=test");
-    str.push_back("ARTIST=GUTAO");
+    vector<string> str = metaEditInfo.newComments;
     out.writeLittleInt(str.size(), 32); // user comment list length
     for (int i = 0; i < str.size(); i++) {
         out.writeLittleInt(str[i].length(), 32);
