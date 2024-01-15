@@ -5,6 +5,7 @@
 #include "Wav2flac.h"
 #include "FlacMetadata.h"
 #include<fstream>
+#include <cstring>
 #include "MD5.h"
 
 static const int BLOCK_SIZE = 4096;
@@ -187,6 +188,19 @@ void Wav2flac::encodeFile(fileReader &in, fileWriter &out, FlacMetadata::MetaEdi
         unsigned int blockSize = min(numSamples, BLOCK_SIZE);
         encodeFrame(in, out, i, numChannels, sampleDepth, sampleRate, blockSize, md5);
         numSamples -= blockSize;
+    }
+
+    bool flag = true;
+    try{
+        in.readBigUInt(1);
+    }
+    catch (exception &e) {
+        if(strcmp(e.what(), "Reached end of file")==0){
+            flag = false;
+        }
+    }
+    if(flag){
+        throw runtime_error("Not finished reading the file");
     }
     md5.finalizeMD5();
     unsigned int md5int[4];
