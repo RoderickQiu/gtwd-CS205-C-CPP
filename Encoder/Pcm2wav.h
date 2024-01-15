@@ -6,6 +6,9 @@
 #define GTWD_PCM2WAV_H
 
 #include<string>
+#include<fstream>
+#include"Utils.h"
+#include"MD5.h"
 
 using namespace std;
 
@@ -13,13 +16,12 @@ typedef struct pcmConfig {
     int sample_rate;
     int depth;
     int channels;
+    long num_samples;
 } PcmConfig;
 
 class Pcm2wav {
 public:
-    static string hello() {
-        return "Hello from Pcm2wav";
-    }
+    static void outputWAVFile(fileReader &in, fileWriter &out, PcmConfig config);
 };
 
 

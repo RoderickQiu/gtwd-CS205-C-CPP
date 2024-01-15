@@ -89,6 +89,7 @@ Should work for both Windows, macOS and Linux.
             - the second one is the comment index to delete
     - `-ac` or `--append-comment`: append comment
         - argument is the comment content to append
+        - if you have multiple comments, use a simple `;` without space to split
     - `-rc` or `--remove-comment`: remove comment
         - argument is the comment index to remove
 
@@ -101,7 +102,7 @@ We suggest that testers use abosulte paths for the input and output files.
 gtwd -m f2w -i "/Users/r/Documents/gtwd/ProvidedDocuments/ovs.flac" -o "/Users/r/Documents/gtwd/ProvidedDocuments/output.wav"
 
 # flac meta data editing
-gtwd -m fe -i "/Users/r/Documents/gtwd/ProvidedDocuments/ovs.flac" -o "/Users/r/Documents/gtwd/ProvidedDocuments/output.flac" -mv "In GuTao we trust" -ac "TITLE=Trinity of GuTao: GuTao the Father, GuTaoZi and GuTao the Holy Spirit"
+gtwd -m fe -i "/Users/r/Documents/gtwd/ProvidedDocuments/ovs.flac" -o "/Users/r/Documents/gtwd/ProvidedDocuments/output.flac" -mv "In GuTao we trust" -ac "TITLE=Trinity of GuTao: GuTao the Father, GuTaoZi and GuTao the Holy Spirit;ARTIST=GuTaoZi"
 
 # flac meta data reading
 gtwd -m fm -i "/Users/r/Documents/gtwd/ProvidedDocuments/output.flac"

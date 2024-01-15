@@ -43,7 +43,25 @@ int main(int argc, char **argv) {
             cout << "Input: " << input << endl;
         if (!output.empty())
             cout << "Output: " << output << endl;
-        if (mode == "f2w" || mode == "w2f" || mode == "w2a" || mode == "a2w") {
+        if (mode == "f2w" || mode == "w2f" || mode == "w2a" || mode == "a2w" || mode == "r2w") {
+            PcmConfig pcmConfig;
+            if (mode == "r2w") {//if we need to read config file (raw)
+                CSimpleIniA ini;
+                ini.SetUnicode();
+                SI_Error rc = ini.LoadFile(config.c_str());
+                if (rc < 0) {
+                    throw runtime_error("Error loading config file");
+                } else {
+                    pcmConfig.channels = (int) ini.GetLongValue("STREAM INFO", "channels");
+                    pcmConfig.depth = (int) ini.GetLongValue("STREAM INFO", "depth");
+                    pcmConfig.sample_rate = (int) ini.GetLongValue("STREAM INFO", "sample_rate");
+                    pcmConfig.num_samples = ini.GetLongValue("STREAM INFO", "num_samples");
+                }
+                cout << "channel: " << pcmConfig.channels << endl;
+                cout << "depth: " << pcmConfig.depth << endl;
+                cout << "sampleRate: " << pcmConfig.sample_rate << endl;
+                cout << "sampleNum: " << pcmConfig.num_samples << endl;
+            }
             char tmpname[FILENAME_MAX];
             char *tev;
             if (tempFolder.empty()) {
@@ -91,6 +109,8 @@ int main(int argc, char **argv) {
                     Wav2aiff::encodeFile(reader, writer);
                 else if (mode == "a2w")
                     Aiff2wav::encodeFile(reader, writer);
+                else if (mode == "r2w")
+                    Pcm2wav::outputWAVFile(reader, writer, pcmConfig);
                 reader.closeReader();
                 writer.closeWriter();
                 ifstream tempInputFile(tmpname, ios::in | ios::binary);
@@ -111,27 +131,10 @@ int main(int argc, char **argv) {
             remove(tmpname);
         } else if (mode == "w2r") {// wav to raw
             cout << Wav2pcm::hello() << endl;
-        } else if (mode == "r2w") {// raw to wav
-            cout << Pcm2wav::hello() << endl;
-            PcmConfig pcmConfig;
-            CSimpleIniA ini;
-            ini.SetUnicode();
-            SI_Error rc = ini.LoadFile(config.c_str());
-            if (rc < 0) {
-                throw runtime_error("Error loading config file");
-            } else {
-                pcmConfig.channels = (int) ini.GetLongValue("STREAM INFO", "channels");
-                pcmConfig.depth = (int) ini.GetLongValue("STREAM INFO", "depth");
-                pcmConfig.sample_rate = (int) ini.GetLongValue("STREAM INFO", "sample_rate");
-            }
-            cout << "CHANNEL: " << pcmConfig.channels << endl;
-            cout << "DEPTH: " << pcmConfig.depth << endl;
-            cout << "SAMPLE RATE: " << pcmConfig.sample_rate << endl;
         } else if (mode == "f2r") {// flac to raw
             cout << Flac2wav::hello() << endl;
             cout << Wav2pcm::hello() << endl;
         } else if (mode == "r2f") {// raw to flac
-            cout << Pcm2wav::hello() << endl;
             cout << Wav2flac::hello() << endl;
         } else if (mode == "fm") {
             ifstream inputFile(input, ios::in | ios::binary);
