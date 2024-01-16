@@ -95,7 +95,7 @@ Should work for both Windows, macOS and Linux.
     - `-mc` or `--modify-comment`: modify comment
         - need two arguments
             - the first one is the comment content
-            - the second one is the comment index to delete
+            - the second one is the comment index to alter
     - `-ac` or `--append-comment`: append comment
         - argument is the comment content to append
         - if you have multiple comments, use a simple `;` without space to split
@@ -139,6 +139,8 @@ gtwd -m f2w -i yourPathToInputFlac -o yourPathToOutputWav -t yourTempPath
 
 ### Provided Examples
 
+- Flac Metadata
+    - `ProvidedDocuments/flac/mono.flac`
 - RAW -> WAV -> FLAC
     - `ProvidedDocuments/raw/ovs.pcm` with `ProvidedDocuments/raw/ovs.ini`
     - `ProvidedDocuments/wav/ovs.wav`

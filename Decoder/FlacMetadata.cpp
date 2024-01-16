@@ -174,8 +174,8 @@ void FlacMetadata::editFile(fileReader &in, fileWriter &out, MetaEditInfo meta) 
         cout << "Modifying comment info: " << meta.modifiedComment << ", at: " << meta.modifyCommentIndex << endl;
     }
     if (meta.appendComment) {
-        info.commentListLength++;
         for (int i = 0; i < meta.newComments.size(); i++) {
+            info.commentListLength++;
             info.commentList.push_back(meta.newComments[i]);
             vector<unsigned int> myVector(meta.newComments[i].begin(), meta.newComments[i].end());
             info.commentsOriginal.push_back(myVector);
